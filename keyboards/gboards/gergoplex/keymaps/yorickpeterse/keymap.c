@@ -73,9 +73,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [5] = LAYOUT_kc(
     // ,----------------------------------------.      ,--------------------------------------.
-         TRNS   , FULL   , LOCK   , TRNS , TRNS ,        TRNS  , TRNS  , TRNS  , TRNS , TRNS  ,
+         TRNS   , TRNS   , TRNS   , TRNS , TRNS ,        TRNS  , TRNS  , TRNS  , TRNS , TRNS  ,
     // |--------+--------+--------+------+------|      |-------+-------+-------+------+-------|
-         WIN(1) , WIN(2) , WIN(3) , TRNS , TRNS ,        TRNS  , TRNS  , TRNS  , TRNS , TRNS  ,
+         WIN(1) , WIN(2) , WIN(3) , TRNS , TRNS ,        TRNS  , FULL  , LOCK  , TRNS , TRNS  ,
     // |--------+--------+--------+------+------|      |-------+-------+-------+------+-------|
           TRNS  , TRNS   , TRNS   , TRNS , TRNS ,        TRNS  , TRNS  , TRNS  , TRNS , TRNS  ,
     // '----------------------------------------'      '--------------------------------------'
