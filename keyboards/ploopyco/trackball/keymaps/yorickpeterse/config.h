@@ -1,0 +1,7 @@
+#pragma once
+
+#undef PLOOPY_DPI_OPTIONS
+#undef PLOOPY_DPI_DEFAULT
+
+#define PLOOPY_DPI_OPTIONS { 1400, 2400 }
+#define PLOOPY_DPI_DEFAULT 1
