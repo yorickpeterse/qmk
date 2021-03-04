@@ -5,7 +5,7 @@
 #define QMK_KEYS_PER_SCAN 4
 
 #undef TAPPING_TERM
-#define TAPPING_TERM 20
+#define TAPPING_TERM 15
 
 #undef RETRO_TAPPING
 #define RETRO_TAPPING
