@@ -10,6 +10,10 @@
 #define NEXT KC_BTN4
 #define PREV KC_BTN5
 
+enum custom_keycodes {
+    SNIPER_BUTTON = PLOOPY_SAFE_RANGE
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
         // Bottom left
@@ -21,6 +25,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // Top right
         MCLICK,
         // Bottom right
-        DPI_CONFIG
+        SNIPER_BUTTON
     )
 };
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch(keycode) {
+        case SNIPER_BUTTON:
+            if(record->event.pressed) {
+                pmw_set_cpi(PLOOPY_DPI_SNIPER_VALUE);
+            } else {
+                pmw_set_cpi(PLOOPY_DPI_NORMAL_VALUE);
+            }
+
+            break;
+    }
+
+    return true;
+}
