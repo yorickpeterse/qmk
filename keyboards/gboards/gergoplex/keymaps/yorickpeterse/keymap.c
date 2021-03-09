@@ -1,22 +1,30 @@
 #include "gergoplex.h"
 
-#define KC_SYM MO(1)
-#define KC_NUM MO(2)
-#define KC_FUN MO(3)
-#define KC_NAV MO(4)
-#define KC_WINS MO(5)
+#define NORMAL 0
+#define SYMBOLS 1
+#define NUMBERS 2
+#define FUNCTION 3
+#define NAVIGATION 4
+#define WINDOWS 5
+
+#define KC_SYM MO(SYMBOLS)
+#define KC_NUM MO(NUMBERS)
+#define KC_FUN MO(FUNCTION)
+#define KC_NAV MO(NAVIGATION)
+#define KC_WINS MO(WINDOWS)
 #define KC_FULL LALT(KC_F11)
 #define KC_LOCK LCTL(LALT(KC_DEL))
 #define KC_TAB_CTL MT(MOD_LCTL, KC_TAB)
 #define KC_WIN(NUM) LCTL(KC_##NUM)
 #define KC_SHIFT_ENT SHIFT_ENT
+#define KC_ALT_TAB LALT(KC_TAB)
 
 enum custom_keycodes {
     SHIFT_ENT
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [0] = LAYOUT_kc(
+    [NORMAL] = LAYOUT_kc(
     // ,-------------------------------.      ,-------------------------------.
            Q   ,  W  ,  F  ,  P  ,  B  ,         J  ,  L  ,  U  ,  Y  ,   V   ,
     // |-------+-----+-----+-----+-----|      |-----+-----+-----+-----+-------|
@@ -28,7 +36,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                LALT , TAB_CTL ,  SPACE  ,        ENT , LSHIFT , RALT   ),
     //       '------+---------+---------'      '-----+--------+--------'
 
-    [1] = LAYOUT_kc(
+    [SYMBOLS] = LAYOUT_kc(
     // ,-------------------------------------.      ,--------------------------------------.
           EXLM , QUES , LPRN , RPRN , BSLASH ,         COLN , MINUS , EQUAL , PLUS , ASTR  ,
     // |-------+------+------+------+--------|      |-------+-------+-------+------+-------|
@@ -40,7 +48,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                           TRNS , TRNS , TRNS ,        TRNS , TRNS , TRNS  ),
     //                  '------+------+------'      '------+------+--------'
 
-    [2] = LAYOUT_kc(
+    [NUMBERS] = LAYOUT_kc(
     // ,-------------------------------------.      ,--------------------------------------.
           ESC  , CIRC , LABK , RABK , TRNS   ,        TRNS  , DLR   , PERC  , TILD , TRNS  ,
     // |-------+------+------+------+--------|      |-------+-------+-------+------+-------|
@@ -52,7 +60,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                           TRNS , TRNS , TRNS ,        SHIFT_ENT , TRNS , TRNS   ),
     //                  '------+------+------'      '-----------+------+--------'
 
-    [3] = LAYOUT_kc(
+    [FUNCTION] = LAYOUT_kc(
     // ,-------------------------------------.      ,--------------------------------------.
          TRNS  , TRNS , TRNS , TRNS , TRNS   ,        TRNS  , TRNS  , TRNS  , TRNS , TRNS  ,
     // |-------+------+------+------+--------|      |-------+-------+-------+------+-------|
@@ -64,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                           TRNS , TRNS , TRNS ,        TRNS , TRNS , TRNS  ),
     //                  '------+------+------'      '------+------+--------'
 
-    [4] = LAYOUT_kc(
+    [NAVIGATION] = LAYOUT_kc(
     // ,----------------------------------------.      ,--------------------------------------.
          TRNS   , TRNS   , UP     , TRNS , TRNS ,        TRNS  , TRNS  , TRNS  , TRNS , TRNS  ,
     // |--------+--------+--------+------+------|      |-------+-------+-------+------+-------|
@@ -76,7 +84,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                           TRNS , TRNS , TRNS ,        TRNS , TRNS , TRNS  ),
     //                  '------+------+------'      '------+------+--------'
 
-    [5] = LAYOUT_kc(
+    [WINDOWS] = LAYOUT_kc(
     // ,----------------------------------------.      ,--------------------------------------.
          TRNS   , TRNS   , TRNS   , TRNS , TRNS ,        TRNS  , TRNS  , TRNS  , TRNS , TRNS  ,
     // |--------+--------+--------+------+------|      |-------+-------+-------+------+-------|
@@ -84,9 +92,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     // |--------+--------+--------+------+------|      |-------+-------+-------+------+-------|
           TRNS  , TRNS   , TRNS   , TRNS , TRNS ,        TRNS  , TRNS  , TRNS  , TRNS , TRNS  ,
     // '----------------------------------------'      '--------------------------------------'
-    //                  .------+------+------.      .------+------+--------.
-                          TRNS , TRNS , TRNS ,        TRNS , TRNS , TRNS  ),
-    //                  '------+------+------'      '------+------+--------'
+    //                  .------+---------+------.      .------+------+--------.
+                          TRNS , ALT_TAB , TRNS ,        TRNS , TRNS , TRNS  ),
+    //                  '------+---------+------'      '------+------+--------'
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
