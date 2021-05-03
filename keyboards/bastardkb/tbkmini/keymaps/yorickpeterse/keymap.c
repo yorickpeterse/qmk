@@ -8,6 +8,12 @@
 #define KC_ENT_OR_SHFT MT(MOD_LSFT, KC_ENT)
 #define KC_OCTL OSM(MOD_LCTL)
 #define KC_FUN MO(FUNCTION)
+#define KC_EXTRA MO(EXTRA)
+#define KC_FULL LALT(KC_F11)
+#define KC_LOCK LCTL(LALT(KC_DEL))
+#define KC_CTL(KEY) LCTL(KC_##KEY)
+#define KC_ROFI LCTL(KC_ENTER)
+#define KC_RESET RESET
 
 // The firmware I'm using is based on the TBK Mini keyboard, which has 6 columns
 // instead of 5.
@@ -27,7 +33,8 @@ enum layer {
     NORMAL,
     SYMBOLS,
     NUMBERS,
-    FUNCTION
+    FUNCTION,
+    EXTRA
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -40,17 +47,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                Z   ,   X   ,   C   ,   D   ,   V   ,          M   ,   H   , COMMA ,  DOT  , BSPACE,
         // '---------------------------------------'      '---------------------------------------'
         //         ,----------+---------+----------.      .---------+--------------+------.
-                        NUM   ,  SPACE  ,   RALT   ,         LALT   , ENT_OR_SHFT  , SYM
+                        NUM   ,  SPACE  ,   ROFI   ,         RALT   , ENT_OR_SHFT  , SYM
         //         '----------+---------+----------'      '---------+--------------+------'
     ),
 
     [SYMBOLS] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             EXLM  , QUES  , LPRN  , RPRN  , BSLASH,        COLN  , MINUS , EQUAL , PLUS  , ASTR  ,
+             EXLM  , QUES  , LPRN  , RPRN  , LABK  ,        RABK  , MINUS , EQUAL , PLUS  , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              PIPE  , AT    , LCBR  , RCBR  , SLASH ,        SCOLON, UNDS  , QUOTE , DQUO  , GRAVE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             CIRC  , HASH  , LBRC  , RBRC  , LABK  ,        RABK  ,  AMPR , PERC  , TILD  ,  DLR  ,
+             CIRC  , HASH  , LBRC  , RBRC  , BSLASH,        COLN  , AMPR  , PERC  , TILD  ,  DLR  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+----------+---------.
                       ____   ,   ____   ,   ____   ,         ____   ,   ____   ,  ____
@@ -63,40 +70,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , ____  , OCTL  , ____  ,  TAB  ,        STAB  , INS   , ____  , ____  , ____  ,
+              LALT , ____  , OCTL  , ____  ,  TAB  ,        STAB  , INS   , ____  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
-        //        ,----------+----------+----------.      .---------+----------+---------.
-                      ____   ,   ____   ,   ____   ,         ____   ,   ____   ,   FUN
-        //        '----------+----------+----------'      '---------+----------+---------'
+        //        ,----------+----------+----------.      .---------+--------+---------.
+                      ____   ,   ____   ,   ____   ,         ____   ,  ____  ,   EXTRA
+        //        '----------+----------+----------'      '---------+--------+---------'
     ),
 
-    [FUNCTION] = LAYOUT(
+    [EXTRA] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , ____  , ____  ,  ____ ,        ____  , ____  , ____  , ____  , ____  ,
+             ____  , ____  , UP    , FULL  ,  LOCK ,        F1    , F2    , F3    , F4    , F5    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              F1   ,  F2   ,  F3   ,  F4   ,  F5   ,         F6   ,  F7   ,  F8   ,  F9   ,  F10  ,
+             ____  , LEFT  , DOWN  , RIGHT , ____  ,        F6    , F7    , F8    , F9    , F10   ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              F11  ,  F12  , ____  , ____  , ____  ,        ____  , ____  , ____  , ____  , ____  ,
+             ____  , CTL(1), CTL(2), CTL(3), ____  ,        ____  , ____  , ____  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+----------+---------.
-                      ____   ,   ____   ,   ____   ,         ____   ,   ____   ,   ____
+                      ____   ,   ____   ,  RESET   ,         ____   ,   ____   ,   ____
         //        '----------+----------+----------'      '---------+----------+---------'
     ),
 };
-
-void keyboard_post_init_user(void) {
-    if (rgblight_is_enabled()) {
-        // Default RGB to off if necessary.
-        rgblight_disable();
-    }
-
-    // Flash a blue light when starting up. This is mostly added so I can see if
-    // the keyboard restarts randomly or not (e.g. when moving the audio cable
-    // by accident).
-    rgblight_enable_noeeprom();
-    rgblight_mode_noeeprom(RGBLIGHT_MODE_STATIC_LIGHT);
-
-    rgblight_setrgb(RGB_BLUE);
-    wait_ms(500);
-    rgblight_disable_noeeprom();
-}
