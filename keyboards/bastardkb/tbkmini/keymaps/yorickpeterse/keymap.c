@@ -1,12 +1,14 @@
 #include QMK_KEYBOARD_H
 
 #define KC_____ KC_TRNS
+#define KC_XXXX KC_TRNS
 #define KC_NONE KC_NO
 #define KC_SYM MO(SYMBOLS)
 #define KC_NUM MO(NUMBERS)
 #define KC_STAB LSFT(KC_TAB)
 #define KC_ENT_OR_SHFT MT(MOD_LSFT, KC_ENT)
-#define KC_OCTL OSM(MOD_LCTL)
+#define KC_OCTL ONESHOT_CONTROL
+#define KC_OSHFT ONESHOT_SHIFT
 #define KC_FUN MO(FUNCTION)
 #define KC_EXTRA MO(EXTRA)
 #define KC_FULL LALT(KC_F11)
@@ -29,6 +31,11 @@
                                KC_##k30, KC_##k31, KC_##k32,       KC_##k33, KC_##k34, KC_##k35  \
 )
 
+enum custom_keycodes {
+    ONESHOT_CONTROL = SAFE_RANGE,
+    ONESHOT_SHIFT
+};
+
 enum layer {
     NORMAL,
     SYMBOLS,
@@ -46,34 +53,34 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                Z   ,   X   ,   C   ,   D   ,   V   ,          M   ,   H   , COMMA ,  DOT  , BSPACE,
         // '---------------------------------------'      '---------------------------------------'
-        //         ,----------+---------+----------.      .---------+--------------+------.
-                        NUM   ,  SPACE  ,   ROFI   ,         RALT   , ENT_OR_SHFT  , SYM
-        //         '----------+---------+----------'      '---------+--------------+------'
+        //         ,----------+---------+----------.      .-------+-------+-------.
+                        NUM   ,  SPACE  ,   ROFI   ,        RALT  ,  ENT  ,  SYM
+        //         '----------+---------+----------'      '-------+-------+-------'
     ),
 
     [SYMBOLS] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             EXLM  , QUES  , LPRN  , RPRN  , LABK  ,        RABK  , MINUS , EQUAL , PLUS  , ASTR  ,
+             EXLM  , QUES  , LPRN  , RPRN  , ____  ,        ____  , MINUS , EQUAL , PLUS  , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              PIPE  , AT    , LCBR  , RCBR  , SLASH ,        SCOLON, UNDS  , QUOTE , DQUO  , GRAVE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              CIRC  , HASH  , LBRC  , RBRC  , BSLASH,        COLN  , AMPR  , PERC  , TILD  ,  DLR  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+----------+---------.
-                      ____   ,   ____   ,   ____   ,         ____   ,   ____   ,  ____
+                      ____   ,   ____   ,   ____   ,         ____   ,   ____   ,  XXXX
         //        '----------+----------+----------'      '---------+----------+---------'
     ),
 
     [NUMBERS] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ESC  , ____  , ____  , ____  ,  ____ ,        ____  , ____  , ____  , ____  , ____  ,
+              ESC  , ____  , LABK  , RABK  ,  ____ ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ , ____  , OCTL  , ____  ,  TAB  ,        STAB  , INS   , LALT  , ____  , ____  ,
+              ____ , ____  , OCTL  , LALT  ,  TAB  ,        STAB  , INS   , OSHFT , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
-                      ____   ,   ____   ,   ____   ,         ____   ,  ____  ,   EXTRA
+                      XXXX   ,   ____   ,   ____   ,         CAPS   , LSHIFT ,   EXTRA
         //        '----------+----------+----------'      '---------+--------+---------'
     ),
 
@@ -86,7 +93,44 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
              ____  , CTL(1), CTL(2), CTL(3), ____  ,        ____  , ____  , ____  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+----------+---------.
-                      ____   ,   ____   ,  RESET   ,         ____   ,   ____   ,   ____
+                      ____   ,   ____   ,  RESET   ,         ____   ,   ____   ,   XXXX
         //        '----------+----------+----------'      '---------+----------+---------'
     ),
 };
+
+// A custom function for triggering one-shot modifiers.
+//
+// The OSH() macro built into QMK disables one-shot modifiers when exiting the
+// layer they were triggered on, if no other key has been pressed (at least it
+// appears that way). The implementation here keeps the modifier active until
+// another key is pressed, or the modifier is disabled by pressing the same key
+// again. This makes it easier to use the modifier when typing quickly.
+void oneshot_modifier(uint16_t modifier, keyrecord_t *record) {
+    int mod_bit = MOD_BIT(modifier);
+
+    if (!record->event.pressed) {
+        return;
+    }
+
+    if ((get_oneshot_mods() & mod_bit) == mod_bit) {
+        // Disable only the modifier that belongs to the same key that set
+        // it. This ensures we can have multiple modifiers set, and only
+        // unset the one we meant to; instead of unsetting all of them.
+        set_oneshot_mods(get_oneshot_mods() & ~mod_bit);
+    } else {
+        set_oneshot_mods(get_oneshot_mods() | mod_bit);
+    }
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case ONESHOT_CONTROL:
+            oneshot_modifier(KC_LCTL, record);
+            break;
+        case ONESHOT_SHIFT:
+            oneshot_modifier(KC_LSHIFT, record);
+            break;
+    }
+
+    return true;
+}
