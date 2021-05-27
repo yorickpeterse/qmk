@@ -3,12 +3,11 @@
 #define KC_____ KC_TRNS
 #define KC_XXXX KC_TRNS
 #define KC_NONE KC_NO
-#define KC_SYM MO(SYMBOLS)
-#define KC_NUM MO(NUMBERS)
+#define KC_CANCEL CANCEL_MODIFIERS
+#define KC_SYM SYM_OR_SHIFT
+#define KC_NUM NUM_OR_CTL
 #define KC_STAB LSFT(KC_TAB)
 #define KC_ENT_OR_SHFT MT(MOD_LSFT, KC_ENT)
-#define KC_OCTL ONESHOT_CONTROL
-#define KC_OSHFT ONESHOT_SHIFT
 #define KC_FUN MO(FUNCTION)
 #define KC_EXTRA MO(EXTRA)
 #define KC_FULL LALT(KC_F11)
@@ -32,8 +31,9 @@
 )
 
 enum custom_keycodes {
-    ONESHOT_CONTROL = SAFE_RANGE,
-    ONESHOT_SHIFT
+    SYM_OR_SHIFT = SAFE_RANGE,
+    NUM_OR_CTL,
+    CANCEL_MODIFIERS
 };
 
 enum layer {
@@ -44,17 +44,41 @@ enum layer {
     EXTRA
 };
 
+enum mod_tap_state {
+    MOD_TAP_DISABLED,
+    MOD_TAP_PENDING,
+    MOD_TAP_TRIGGER,
+    MOD_TAP_RELEASE,
+};
+
+struct mod_tap {
+    // The mod-tap state.
+    enum mod_tap_state state;
+
+    // The time the modifier was activated on.
+    uint16_t timer;
+
+    // The one-shot modifier to apply when the button is tapped.
+    uint16_t modifier;
+
+    // The layer to activate when the button is held down.
+    int layer;
+};
+
+// The time (in milliseconds) after which a mod-tap modifier is disabled.
+const static uint16_t MOD_TAP_TIMEOUT = 1500;
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [NORMAL] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-               Q   ,   W   ,   F   ,   P   ,   B   ,          J   ,   L   ,   U   ,   Y   , DELETE,
+               Q   ,   W   ,   F   ,   P   ,   B   ,          J   ,   L   ,   U   ,   Y   , RALT  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                A   ,   R   ,   S   ,   T   ,   G   ,          K   ,   N   ,   E   ,   I   ,   O   ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-               Z   ,   X   ,   C   ,   D   ,   V   ,          M   ,   H   , COMMA ,  DOT  , BSPACE,
+               Z   ,   X   ,   C   ,   D   ,   V   ,          M   ,   H   , COMMA ,  DOT  , CANCEL,
         // '---------------------------------------'      '---------------------------------------'
         //         ,----------+---------+----------.      .-------+-------+-------.
-                        NUM   ,  SPACE  ,   ROFI   ,        RALT  ,  ENT  ,  SYM
+                        NUM   ,  SPACE  ,   ROFI   ,        CAPS  ,  ENT  ,  SYM
         //         '----------+---------+----------'      '-------+-------+-------'
     ),
 
@@ -64,7 +88,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              PIPE  , AT    , LCBR  , RCBR  , SLASH ,        SCOLON, UNDS  , QUOTE , DQUO  , GRAVE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             CIRC  , HASH  , LBRC  , RBRC  , BSLASH,        COLN  , AMPR  , PERC  , TILD  ,  DLR  ,
+             CIRC  , HASH  , LBRC  , RBRC  , BSLASH,        COLN  , AMPR  , PERC  , DLR   , TILD  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+----------+---------.
                       ____   ,   ____   ,   ____   ,         ____   ,   ____   ,  XXXX
@@ -73,14 +97,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [NUMBERS] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ESC  , ____  , LABK  , RABK  ,  ____ ,        ____  , ____  , ____  , ____  , ____  ,
+              ESC  , ____  , LABK  , RABK  ,  ____ ,        INS   , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ , ____  , OCTL  , LALT  ,  TAB  ,        STAB  , ____  , OSHFT , ____  , INS   ,
+              ____ , ____  , LCTL  , LALT  ,  TAB  ,        STAB  , BSPACE, DELETE, ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
-                      XXXX   ,   ____   ,   ____   ,         CAPS   , LSHIFT ,   EXTRA
+                      XXXX   ,   ____   ,   ____   ,         ____   ,  ____  ,  EXTRA
         //        '----------+----------+----------'      '---------+--------+---------'
     ),
 
@@ -98,38 +122,123 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 
-// A custom function for triggering one-shot modifiers.
-//
-// The OSH() macro built into QMK disables one-shot modifiers when exiting the
-// layer they were triggered on, if no other key has been pressed (at least it
-// appears that way). The implementation here keeps the modifier active until
-// another key is pressed, or the modifier is disabled by pressing the same key
-// again. This makes it easier to use the modifier when typing quickly.
-void oneshot_modifier(uint16_t modifier, keyrecord_t *record) {
-    int mod_bit = MOD_BIT(modifier);
+static struct mod_tap sym_state = {
+    .state = MOD_TAP_DISABLED,
+    .timer = 0,
+    .modifier = KC_LSHIFT,
+    .layer = SYMBOLS,
+};
 
-    if (!record->event.pressed) {
+static struct mod_tap num_state = {
+    .state = MOD_TAP_DISABLED,
+    .timer = 0,
+    .modifier = KC_LCTL,
+    .layer = NUMBERS,
+};
+
+bool oneshot_timer_expired(struct mod_tap *state) {
+    return state->timer > 0 && (timer_elapsed(state->timer) > MOD_TAP_TIMEOUT);
+}
+
+void reset_all_oneshot_modifiers(void) {
+    sym_state.state = MOD_TAP_DISABLED;
+    sym_state.timer = 0;
+
+    num_state.state = MOD_TAP_DISABLED;
+    num_state.timer = 0;
+}
+
+// Enables a layer or toggles a oneshot modifier key.
+//
+// This uses custom logic instead of QMK's built-in functions for enabling
+// oneshot modifiers. This makes it possible to enable a oneshot modifier using
+// key A, then press key A again to activate a layer, then tap something on that
+// layer and have the modifier applied.
+//
+// When using QMK, _any_ key press after enabling a oneshot modifier will have
+// the "down" event of the modifier applied to it. This makes it impossible to
+// use the modifiers for any keys on the layer.
+//
+// In addition, the setup here simply gives us more control; at the cost of a
+// bit of extra code. Peraps there's an easier way of achieving all this, but I
+// haven't found it yet :<
+void oneshot_modifier_or_layer(struct mod_tap *state, keyrecord_t *record) {
+    if (record->event.pressed) {
+        if (state->state == MOD_TAP_DISABLED) {
+            // We only overwrite the disabled state to allow for modifiers for
+            // keys on the layer. If we always set the state to "pending", this
+            // wouldn't be possible.
+            state->state = MOD_TAP_PENDING;
+            state->timer = 0;
+        }
+
+        layer_on(state->layer);
+
         return;
     }
 
-    if ((get_oneshot_mods() & mod_bit) == mod_bit) {
-        // Disable only the modifier that belongs to the same key that set
-        // it. This ensures we can have multiple modifiers set, and only
-        // unset the one we meant to; instead of unsetting all of them.
-        set_oneshot_mods(get_oneshot_mods() & ~mod_bit);
-    } else {
-        set_oneshot_mods(get_oneshot_mods() | mod_bit);
+    // The code that follows runs when the key is released.
+    layer_off(state->layer);
+
+    if (state->state == MOD_TAP_PENDING) {
+        // No key was pressed, apply the modifier to the next key.
+        state->timer = timer_read();
+        state->state = MOD_TAP_TRIGGER;
+
+        return;
+    }
+}
+
+void handle_pending_mod_tap(struct mod_tap *state, keyrecord_t *record) {
+    if (state->state == MOD_TAP_PENDING) {
+        // The layer is still active, and we pressed a key on that layer. In
+        // this case we don't enable any one-shot keys.
+        state->state = MOD_TAP_DISABLED;
+
+        return;
+    }
+
+    if (state->state == MOD_TAP_TRIGGER) {
+        // A oneshot key is enabled. Only trigger it if the timeout didn't
+        // expire.
+        if (oneshot_timer_expired(state)) {
+            state->timer = 0;
+            state->state = MOD_TAP_DISABLED;
+
+            return;
+        }
+
+        register_code(state->modifier);
+        state->state = MOD_TAP_RELEASE;
+
+        return;
+    }
+
+    if (state->state == MOD_TAP_RELEASE) {
+        // A oneshot key has been registered, and we need to unregister it.
+        unregister_code(state->modifier);
+
+        state->state = MOD_TAP_DISABLED;
     }
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case ONESHOT_CONTROL:
-            oneshot_modifier(KC_LCTL, record);
+        case SYM_OR_SHIFT:
+            oneshot_modifier_or_layer(&sym_state, record);
             break;
-        case ONESHOT_SHIFT:
-            oneshot_modifier(KC_LSHIFT, record);
+        case NUM_OR_CTL:
+            oneshot_modifier_or_layer(&num_state, record);
             break;
+        case KC_EXTRA:
+            // Don't apply modifiers to this layer key.
+            return true;
+        case CANCEL_MODIFIERS:
+            reset_all_oneshot_modifiers();
+            break;
+        default:
+            handle_pending_mod_tap(&sym_state, record);
+            handle_pending_mod_tap(&num_state, record);
     }
 
     return true;
