@@ -6,7 +6,7 @@
 #define KC_SYM MO(SYMBOLS)
 #define KC_NUM MO(NUMBERS)
 #define KC_STAB LSFT(KC_TAB)
-#define KC_FUN MO(FUNCTION)
+#define KC_FUN OSL(FUNCTION)
 #define KC_EXTRA MO(EXTRA)
 #define KC_FULL LALT(KC_F11)
 #define KC_LOCK LCTL(LALT(KC_DEL))
@@ -59,14 +59,24 @@ struct oneshot {
 // The time (in milliseconds) after which a mod-tap modifier is disabled.
 const static uint16_t ONESHOT_MOD_TIMEOUT = 1500;
 
+enum combos {
+    COMBO_COMMA_DOT,
+};
+
+const uint16_t PROGMEM comma_dot_combo[] = { KC_COMMA, KC_DOT, COMBO_END };
+
+combo_t key_combos[COMBO_COUNT] = {
+    [COMBO_COMMA_DOT] = COMBO_ACTION(comma_dot_combo),
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [NORMAL] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-               Q   ,   W   ,   F   ,   P   ,   B   ,          J   ,   L   ,   U   ,   Y   , EXTRA ,
+               Q   ,   W   ,   F   ,   P   ,   B   ,          J   ,   L   ,   U   ,   Y   , RALT  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                A   ,   R   ,   S   ,   T   ,   G   ,          K   ,   N   ,   E   ,   I   ,   O   ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-               Z   ,   X   ,   C   ,   D   ,   V   ,          M   ,   H   , COMMA ,  DOT  , RALT  ,
+               Z   ,   X   ,   C   ,   D   ,   V   ,          M   ,   H   , COMMA ,  DOT  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //               ,-------+---------+-------.      .--------+----------+-------.
                             NUM  ,  SPACE  ,  FUN  ,         CAPS  ,  OSHIFT  ,  SYM
@@ -101,7 +111,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [EXTRA] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , UP    , FULL  ,  LOCK ,        ____  , ____  , ____  , ____  , XXXX  ,
+             ____  , ____  , UP    , FULL  , LOCK  ,        ____  , ____  , ____  , ____  , XXXX  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -199,6 +209,16 @@ void handle_oneshot_modifier(struct oneshot *state) {
         state->state = ONESHOT_DISABLED;
 
         unregister_code(state->modifier);
+    }
+}
+
+void process_combo_event(uint16_t combo_index, bool pressed) {
+    if (combo_index == COMBO_COMMA_DOT) {
+        if (pressed) {
+            layer_on(EXTRA);
+        } else {
+            layer_off(EXTRA);
+        }
     }
 }
 
