@@ -11,7 +11,6 @@
 #define KC_FULL LALT(KC_F11)
 #define KC_LOCK LCTL(LALT(KC_DEL))
 #define KC_CTL(KEY) LCTL(KC_##KEY)
-#define KC_ROFI LCTL(KC_ENTER)
 #define KC_RESET RESET
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
@@ -32,7 +31,7 @@
 
 enum custom_keycodes {
     ONESHOT_SHIFT = SAFE_RANGE,
-    ONESHOT_CTL
+    ONESHOT_CTL,
 };
 
 enum layer {
@@ -46,6 +45,8 @@ enum layer {
 enum oneshot_state {
     ONESHOT_DISABLED,
     ONESHOT_TRIGGER,
+    ONESHOT_HOLDING,
+    ONESHOT_RELEASE_AFTER_HOLD,
     ONESHOT_RELEASE,
 };
 
@@ -61,15 +62,15 @@ const static uint16_t ONESHOT_MOD_TIMEOUT = 1500;
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [NORMAL] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-               Q   ,   W   ,   F   ,   P   ,   B   ,          J   ,   L   ,   U   ,   Y   , RALT  ,
+               Q   ,   W   ,   F   ,   P   ,   B   ,          J   ,   L   ,   U   ,   Y   , EXTRA ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                A   ,   R   ,   S   ,   T   ,   G   ,          K   ,   N   ,   E   ,   I   ,   O   ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-               Z   ,   X   ,   C   ,   D   ,   V   ,          M   ,   H   , COMMA ,  DOT  , EXTRA ,
+               Z   ,   X   ,   C   ,   D   ,   V   ,          M   ,   H   , COMMA ,  DOT  , RALT  ,
         // '---------------------------------------'      '---------------------------------------'
-        //         ,----------+---------+----------.      .-------+-------+-------.
-                        NUM   ,  SPACE  ,   ROFI   ,        CAPS  ,  ENT  ,  SYM
-        //         '----------+---------+----------'      '-------+-------+-------'
+        //               ,-------+---------+-------.      .--------+----------+-------.
+                            NUM  ,  SPACE  ,  FUN  ,         CAPS  ,  OSHIFT  ,  SYM
+        //               '-------+---------+-------'      '--------+----------+-------'
     ),
 
     [SYMBOLS] = LAYOUT(
@@ -91,7 +92,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ , ____  , OCTL  , LALT  ,  TAB  ,        STAB  , BSPACE, OSHIFT, DELETE, ____  ,
+              ____ , ____  , OCTL  , LALT  ,  TAB  ,        STAB  , BSPACE,  ENT  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       XXXX   ,   ____   ,   ____   ,         ____   ,  ____  ,   ____
@@ -100,15 +101,28 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [EXTRA] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , UP    , FULL  ,  LOCK ,        F1    , F2    , F3    , F4    , F5    ,
+             ____  , ____  , UP    , FULL  ,  LOCK ,        ____  , ____  , ____  , ____  , XXXX  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        F6    , F7    , F8    , F9    , F10   ,
+             ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , CTL(1), CTL(2), CTL(3), PGDOWN,        ____  , ____  , ____  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+----------+---------.
-                      ____   ,   ____   ,  RESET   ,         ____   ,   ____   ,   XXXX
+                      ____   ,   ____   ,  RESET   ,         ____   ,   ____   ,   ____
         //        '----------+----------+----------'      '---------+----------+---------'
+    ),
+
+    [FUNCTION] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+              ____ ,  ____ ,  ____ ,  ____ ,  ____ ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              F1   ,  F2   ,  F3   ,  F4   ,  F5   ,         F6   ,  F7   ,  F8   ,  F9   ,  F10  ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              ____ ,  ____ ,  ____ ,  ____ ,  ____ ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
+        // '---------------------------------------'      '---------------------------------------'
+        //        ,----------+----------+----------.      .---------+--------+---------.
+                      ____   ,   ____   ,   XXXX   ,         ____   ,  ____  ,   ____
+        //        '----------+----------+----------'      '---------+--------+---------'
     ),
 };
 
@@ -129,8 +143,16 @@ bool oneshot_timer_expired(struct oneshot *state) {
 }
 
 void oneshot_modifier(struct oneshot *state, keyrecord_t *record) {
-    // We only want to act upon pressing the key, not when it's released.
     if (!record->event.pressed) {
+        if (state->state == ONESHOT_HOLDING) {
+            state->state = ONESHOT_TRIGGER;
+        }
+        else if (state->state == ONESHOT_RELEASE_AFTER_HOLD) {
+            state->state = ONESHOT_DISABLED;
+
+            unregister_code(state->modifier);
+        }
+
         return;
     }
 
@@ -142,12 +164,24 @@ void oneshot_modifier(struct oneshot *state, keyrecord_t *record) {
         return;
     }
 
-    state->state = ONESHOT_TRIGGER;
+    state->state = ONESHOT_HOLDING;
     state->timer = timer_read();
 }
 
-void handle_oneshot_modifier(struct oneshot *state, keyrecord_t *record) {
+void handle_oneshot_modifier(struct oneshot *state) {
+    if (state->state == ONESHOT_HOLDING) {
+        // We pressed a key while the modifier is still being held. In this case
+        // we'll unregister the modifier when the modifier key is released.
+        state->timer = 0;
+        state->state = ONESHOT_RELEASE_AFTER_HOLD;
+
+        register_code(state->modifier);
+        return;
+    }
+
     if (state->state == ONESHOT_TRIGGER) {
+        // The modifier key was released before another key was pressed. In this
+        // case we'll apply (if still valid) the modifier to the next key.
         if (oneshot_timer_expired(state)) {
             state->timer = 0;
             state->state = ONESHOT_DISABLED;
@@ -177,14 +211,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             oneshot_modifier(&ctl_state, record);
             break;
         case KC_SYM:
-            break;
         case KC_NUM:
-            break;
         case KC_EXTRA:
             break;
         default:
-            handle_oneshot_modifier(&shift_state, record);
-            handle_oneshot_modifier(&ctl_state, record);
+            handle_oneshot_modifier(&shift_state);
+            handle_oneshot_modifier(&ctl_state);
     }
 
     return true;
