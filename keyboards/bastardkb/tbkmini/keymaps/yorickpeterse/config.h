@@ -17,6 +17,6 @@
 #define RGBLIGHT_DEFAULT_VAL RGBLIGHT_LIMIT_VAL / 2
 
 #define COMBO_TERM 50
-#define COMBO_COUNT 1
+#define COMBO_COUNT 0
 
 #define EE_HANDS

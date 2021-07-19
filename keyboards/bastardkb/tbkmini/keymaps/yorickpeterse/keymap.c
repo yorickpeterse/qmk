@@ -59,16 +59,6 @@ struct oneshot {
 // The time (in milliseconds) after which a mod-tap modifier is disabled.
 const static uint16_t ONESHOT_MOD_TIMEOUT = 1500;
 
-enum combos {
-    COMBO_COMMA_DOT,
-};
-
-const uint16_t PROGMEM comma_dot_combo[] = { KC_COMMA, KC_DOT, COMBO_END };
-
-combo_t key_combos[COMBO_COUNT] = {
-    [COMBO_COMMA_DOT] = COMBO_ACTION(comma_dot_combo),
-};
-
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [NORMAL] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
@@ -85,7 +75,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [SYMBOLS] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             EXLM  , QUES  , LPRN  , RPRN  , ____  ,        ____  , MINUS , EQUAL , PLUS  , ASTR  ,
+             EXLM  , QUES  , LPRN  , RPRN  , LABK  ,        RABK  , MINUS , EQUAL , PLUS  , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              PIPE  , AT    , LCBR  , RCBR  , SLASH ,        SCOLON, UNDS  , QUOTE , DQUO  , GRAVE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -98,20 +88,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [NUMBERS] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ESC  , ____  , LABK  , RABK  ,  ____ ,        INS   , ____  , ____  , ____  , ____  ,
+              ESC  , ____  , ____  , ____  ,  ____ ,        INS   , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               ____ , ____  , OCTL  , LALT  ,  TAB  ,        STAB  , BSPACE,  ENT  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
-                      XXXX   ,   ____   ,   ____   ,         ____   ,  ____  ,   ____
+                      XXXX   ,   ____   ,   ____   ,         ____   ,  ____  ,  EXTRA
         //        '----------+----------+----------'      '---------+--------+---------'
     ),
 
     [EXTRA] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , UP    , FULL  , LOCK  ,        ____  , ____  , ____  , ____  , XXXX  ,
+             ____  , ____  , UP    , FULL  , LOCK  ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -209,16 +199,6 @@ void handle_oneshot_modifier(struct oneshot *state) {
         state->state = ONESHOT_DISABLED;
 
         unregister_code(state->modifier);
-    }
-}
-
-void process_combo_event(uint16_t combo_index, bool pressed) {
-    if (combo_index == COMBO_COMMA_DOT) {
-        if (pressed) {
-            layer_on(EXTRA);
-        } else {
-            layer_off(EXTRA);
-        }
     }
 }
 
