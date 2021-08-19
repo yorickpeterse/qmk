@@ -14,6 +14,7 @@
 #define KC_RESET RESET
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
+#define KC_OSCTL ONESHOT_SHIFT_CTL
 
 // The firmware I'm using is based on the TBK Mini keyboard, which has 6 columns
 // instead of 5.
@@ -32,6 +33,7 @@
 enum custom_keycodes {
     ONESHOT_SHIFT = SAFE_RANGE,
     ONESHOT_CTL,
+    ONESHOT_SHIFT_CTL
 };
 
 enum layer {
@@ -92,7 +94,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ , BSPACE, ____  , ____  , ____  ,
+              ____ ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ , BSPACE, OSCTL , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       XXXX   ,   ____   ,   ____   ,         ____   ,  ENT   ,  EXTRA
@@ -208,6 +210,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             oneshot_modifier(&shift_state, record);
             break;
         case ONESHOT_CTL:
+            oneshot_modifier(&ctl_state, record);
+            break;
+        case ONESHOT_SHIFT_CTL:
+            oneshot_modifier(&shift_state, record);
             oneshot_modifier(&ctl_state, record);
             break;
         case KC_SYM:
