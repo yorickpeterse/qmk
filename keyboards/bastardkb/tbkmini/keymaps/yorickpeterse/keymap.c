@@ -1,4 +1,3 @@
-// clang-format off
 #include QMK_KEYBOARD_H
 
 #define KC_____ KC_TRNS
@@ -19,6 +18,7 @@
 
 // The firmware I'm using is based on the TBK Mini keyboard, which has 6 columns
 // instead of 5.
+// clang-format off
 #define LAYOUT( \
     k00, k01, k02, k03, k04,       k05, k06, k07, k08, k09, \
     k10, k11, k12, k13, k14,       k15, k16, k17, k18, k19, \
@@ -30,6 +30,7 @@
     KC_NO, KC_##k20, KC_##k21, KC_##k22, KC_##k23, KC_##k24,       KC_##k25, KC_##k26, KC_##k27, KC_##k28, KC_##k29, KC_NO, \
                                KC_##k30, KC_##k31, KC_##k32,       KC_##k33, KC_##k34, KC_##k35  \
 )
+// clang-format on
 
 enum custom_keycodes {
     ONESHOT_SHIFT = SAFE_RANGE,
@@ -37,13 +38,7 @@ enum custom_keycodes {
     ONESHOT_SHIFT_CTL
 };
 
-enum layer {
-    NORMAL,
-    SYMBOLS,
-    NUMBERS,
-    FUNCTION,
-    EXTRA
-};
+enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA };
 
 enum oneshot_state {
     ONESHOT_DISABLED,
@@ -62,6 +57,7 @@ struct oneshot {
 // The time (in milliseconds) after which a mod-tap modifier is disabled.
 const static uint16_t ONESHOT_MOD_TIMEOUT = 1500;
 
+// clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [NORMAL] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
@@ -128,6 +124,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         //        '----------+----------+----------'      '---------+--------+---------'
     ),
 };
+// clang-format on
 
 static struct oneshot shift_state = {
     .state = ONESHOT_DISABLED,
@@ -142,15 +139,15 @@ static struct oneshot ctl_state = {
 };
 
 bool oneshot_timer_expired(struct oneshot *state) {
-    return state->timer > 0 && (timer_elapsed(state->timer) > ONESHOT_MOD_TIMEOUT);
+    return state->timer > 0 &&
+           (timer_elapsed(state->timer) > ONESHOT_MOD_TIMEOUT);
 }
 
 void oneshot_modifier(struct oneshot *state, keyrecord_t *record) {
     if (!record->event.pressed) {
         if (state->state == ONESHOT_HOLDING) {
             state->state = ONESHOT_TRIGGER;
-        }
-        else if (state->state == ONESHOT_RELEASE_AFTER_HOLD) {
+        } else if (state->state == ONESHOT_RELEASE_AFTER_HOLD) {
             state->state = ONESHOT_DISABLED;
 
             unregister_code(state->modifier);
@@ -207,25 +204,24 @@ void handle_oneshot_modifier(struct oneshot *state) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case ONESHOT_SHIFT:
-            oneshot_modifier(&shift_state, record);
-            break;
-        case ONESHOT_CTL:
-            oneshot_modifier(&ctl_state, record);
-            break;
-        case ONESHOT_SHIFT_CTL:
-            oneshot_modifier(&shift_state, record);
-            oneshot_modifier(&ctl_state, record);
-            break;
-        case KC_SYM:
-        case KC_NUMS:
-        case KC_EXTRA:
-            break;
-        default:
-            handle_oneshot_modifier(&shift_state);
-            handle_oneshot_modifier(&ctl_state);
+    case ONESHOT_SHIFT:
+        oneshot_modifier(&shift_state, record);
+        break;
+    case ONESHOT_CTL:
+        oneshot_modifier(&ctl_state, record);
+        break;
+    case ONESHOT_SHIFT_CTL:
+        oneshot_modifier(&shift_state, record);
+        oneshot_modifier(&ctl_state, record);
+        break;
+    case KC_SYM:
+    case KC_NUMS:
+    case KC_EXTRA:
+        break;
+    default:
+        handle_oneshot_modifier(&shift_state);
+        handle_oneshot_modifier(&ctl_state);
     }
 
     return true;
 }
-// clang-format on
