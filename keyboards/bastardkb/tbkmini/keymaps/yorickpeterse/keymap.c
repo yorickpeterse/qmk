@@ -1,10 +1,11 @@
+// clang-format off
 #include QMK_KEYBOARD_H
 
 #define KC_____ KC_TRNS
 #define KC_XXXX KC_TRNS
 #define KC_NONE KC_NO
 #define KC_SYM MO(SYMBOLS)
-#define KC_NUM MO(NUMBERS)
+#define KC_NUMS MO(NUMBERS)
 #define KC_STAB LSFT(KC_TAB)
 #define KC_FUN OSL(FUNCTION)
 #define KC_EXTRA MO(EXTRA)
@@ -71,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                Z   ,   X   ,   C   ,   D   ,   V   ,          K   ,   H   , COMMA ,  DOT  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //               ,-------+---------+-------.      .--------+----------+-------.
-                            NUM  ,  SPACE  ,  FUN  ,         ____  ,  OSHIFT  ,  SYM
+                            NUMS ,  SPACE  ,  FUN  ,         ____  ,  OSHIFT  ,  SYM
         //               '-------+---------+-------'      '--------+----------+-------'
     ),
 
@@ -217,7 +218,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             oneshot_modifier(&ctl_state, record);
             break;
         case KC_SYM:
-        case KC_NUM:
+        case KC_NUMS:
         case KC_EXTRA:
             break;
         default:
@@ -227,3 +228,4 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     return true;
 }
+// clang-format on
