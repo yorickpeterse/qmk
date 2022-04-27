@@ -5,6 +5,7 @@
 #define KC_NONE KC_NO
 #define KC_SYM MO(SYMBOLS)
 #define KC_NUMS MO(NUMBERS)
+#define KC_MOUSE TG(MOUSE)
 #define KC_STAB LSFT(KC_TAB)
 #define KC_FUN OSL(FUNCTION)
 #define KC_EXTRA MO(EXTRA)
@@ -38,7 +39,7 @@ enum custom_keycodes {
     ONESHOT_SHIFT_CTL
 };
 
-enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA };
+enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA, MOUSE };
 
 enum oneshot_state {
     ONESHOT_DISABLED,
@@ -68,7 +69,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                Z   ,   X   ,   C   ,   D   ,   V   ,          K   ,   H   , COMMA ,  DOT  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //               ,-------+---------+-------.      .--------+----------+-------.
-                            NUMS ,  SPACE  ,  FUN  ,         ____  ,  OSHIFT  ,  SYM
+                            NUMS ,  SPACE  ,  FUN  ,         MOUSE ,  OSHIFT  ,  SYM
         //               '-------+---------+-------'      '--------+----------+-------'
     ),
 
@@ -121,6 +122,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       ____   ,   ____   ,   XXXX   ,         ____   ,  ____  ,   ____
+        //        '----------+----------+----------'      '---------+--------+---------'
+    ),
+
+    [MOUSE] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+              NONE ,  NONE ,  NONE ,  NONE ,  NONE ,         NONE ,  NONE ,  MS_U ,  NONE ,  NONE ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              NONE ,  ACL0 ,  ACL2 ,  NONE ,  WH_U ,         NONE ,  MS_L ,  MS_D ,  MS_R ,  NONE ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              NONE , CTL(C),  LCTL , LSHIFT,  WH_D ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
+        // '---------------------------------------'      '---------------------------------------'
+        //        ,----------+----------+----------.      .---------+--------+---------.
+                      NONE   ,   BTN3   ,   NONE   ,         XXXX   ,  BTN1  ,   BTN2
         //        '----------+----------+----------'      '---------+--------+---------'
     ),
 };
@@ -217,6 +231,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case KC_SYM:
     case KC_NUMS:
     case KC_EXTRA:
+    case KC_MOUSE:
         break;
     default:
         handle_oneshot_modifier(&shift_state);
