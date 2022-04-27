@@ -127,7 +127,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [MOUSE] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              NONE ,  NONE ,  NONE ,  NONE ,  NONE ,         NONE ,  NONE ,  MS_U ,  NONE ,  NONE ,
+              ESC  ,  NONE ,  NONE ,  NONE ,  NONE ,         NONE ,  NONE ,  MS_U ,  NONE ,  NONE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               NONE ,  ACL0 ,  ACL2 ,  NONE ,  WH_U ,         NONE ,  MS_L ,  MS_D ,  MS_R ,  NONE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
