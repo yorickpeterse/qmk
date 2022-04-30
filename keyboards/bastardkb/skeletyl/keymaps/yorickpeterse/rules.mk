@@ -1,8 +1,8 @@
 # Certain changes may require re-flashing both halves using the following
 # commands:
 #
-# - left: make bastardkb/tbkmini:yorickpeterse:dfu-split-left
-# - right: make bastardkb/tbkmini:yorickpeterse:dfu-split-right
+# - left: make bastardkb/skeletyl:yorickpeterse:dfu-split-left
+# - right: make bastardkb/skeletyl:yorickpeterse:dfu-split-right
 #
 # MCU name
 MCU = atmega32u4
@@ -34,4 +34,5 @@ AUDIO_SUPPORTED = no
 RGB_MATRIX_SUPPORTED = no
 RGBLIGHT_SUPPORTED = no
 
-LAYOUTS = split_3x6_3
+LAYOUTS = split_3x5_3
+DEBOUNCE_TYPE = sym_eager_pk

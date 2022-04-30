@@ -4,6 +4,7 @@
 #undef ONESHOT_TIMEOUT
 #undef QMK_KEYS_PER_SCAN
 #undef TAPPING_TERM
+#undef DEBOUNCE
 
 #define RETRO_TAPPING
 
@@ -34,3 +35,8 @@
 #define MOUSEKEY_WHEEL_INTERVAL 32
 #define MOUSEKEY_WHEEL_MAX_SPEED 4
 #define MOUSEKEY_WHEEL_TIME_TO_MAX 80
+
+// Changing the debounce time requires flashing both halves separately.
+#define DEBOUNCE 5
+
+#define USB_POLLING_INTERVAL_MS 1
