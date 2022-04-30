@@ -1,6 +1,5 @@
 #pragma once
 
-#undef DEBOUNCE
 #undef IGNORE_MOD_TAP_INTERRUPT
 #undef ONESHOT_TIMEOUT
 #undef QMK_KEYS_PER_SCAN

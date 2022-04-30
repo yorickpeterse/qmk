@@ -1,2 +1,2 @@
 #!/usr/bin/env fish
-qmk flash -kb bastardkb/tbkmini -km yorickpeterse
+qmk flash -kb bastardkb/skeletyl -km yorickpeterse
