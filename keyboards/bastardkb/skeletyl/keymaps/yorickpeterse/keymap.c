@@ -12,6 +12,7 @@
 #define KC_FULL LALT(KC_F11)
 #define KC_LOCK LCTL(LALT(KC_DEL))
 #define KC_CTL(KEY) LCTL(KC_##KEY)
+#define KC_GUI(KEY) LGUI(KC_##KEY)
 #define KC_RESET RESET
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
@@ -36,7 +37,7 @@
 enum custom_keycodes {
     ONESHOT_SHIFT = SAFE_RANGE,
     ONESHOT_CTL,
-    ONESHOT_SHIFT_CTL
+    ONESHOT_SHIFT_CTL,
 };
 
 enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA, MOUSE };
@@ -101,7 +102,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [EXTRA] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , UP    , FULL  , LOCK  ,        ____  , ____  , ____  , ____  , ____  ,
+             ____  , GUI(W), UP    , FULL  , LOCK  ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -118,7 +119,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               F1   ,  F2   ,  F3   ,  F4   ,  F5   ,         F6   ,  F7   ,  F8   ,  F9   ,  F10  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ ,  ____ ,  LCTL , LSHIFT,  ____ ,         F11  ,  F12  ,  ____ ,  ____ ,  ____ ,
+              ____ ,  ____ ,  ____ ,  ____ ,  ____ ,         F11  ,  F12  ,  ____ ,  ____ ,  ____ ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       ____   ,   ____   ,   XXXX   ,         ____   ,  ____  ,   ____
@@ -129,9 +130,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // ,---------------------------------------.      ,---------------------------------------.
               ESC  ,  NONE ,  NONE ,  NONE ,  NONE ,         NONE ,  NONE ,  MS_U ,  NONE ,  NONE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              NONE ,  ACL0 ,  ACL2 ,  NONE ,  WH_U ,         NONE ,  MS_L ,  MS_D ,  MS_R ,  NONE ,
+              NONE ,  NONE ,  ACL0 ,  ACL2 ,  WH_U ,         NONE ,  MS_L ,  MS_D ,  MS_R ,  NONE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              NONE , CTL(C),  LCTL , LSHIFT,  WH_D ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
+              NONE ,  NONE , LSHIFT, LCTL  ,  WH_D ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       NONE   ,   BTN3   ,   NONE   ,         XXXX   ,  BTN1  ,   BTN2
