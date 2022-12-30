@@ -70,7 +70,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                Z   ,   X   ,   C   ,   D   ,   V   ,          K   ,   H   , COMMA ,  DOT  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //               ,-------+---------+-------.      .--------+----------+-------.
-                            NUMS ,  SPACE  ,  FUN  ,         MOUSE ,  OSHIFT  ,  SYM
+                            NUMS ,  SPACE  , MOUSE ,          FUN  ,  OSHIFT  ,  SYM
         //               '-------+---------+-------'      '--------+----------+-------'
     ),
 
@@ -128,14 +128,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [MOUSE] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ESC  ,  NONE ,  NONE ,  NONE ,  NONE ,         NONE ,  NONE ,  MS_U ,  NONE ,  NONE ,
+              ESC  ,  NONE ,  NONE ,  NONE ,  NONE ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              NONE ,  NONE ,  ACL0 ,  ACL2 ,  WH_U ,         NONE ,  MS_L ,  MS_D ,  MS_R ,  NONE ,
+              NONE ,  NONE ,  NONE ,  NONE ,  WH_U ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              NONE ,  NONE , LSHIFT, LCTL  ,  WH_D ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
+              NONE ,  BTN3 , LSHIFT, LCTL  ,  WH_D ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
-                      NONE   ,   BTN3   ,   NONE   ,         XXXX   ,  BTN1  ,   BTN2
+                      BTN2   ,   BTN1   ,   XXXX   ,         ____   ,  ____  ,   ____
         //        '----------+----------+----------'      '---------+--------+---------'
     ),
 };
