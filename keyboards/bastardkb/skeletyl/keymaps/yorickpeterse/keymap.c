@@ -17,6 +17,8 @@
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
 #define KC_OSCTL ONESHOT_SHIFT_CTL
+#define KC_RESETN RESET_NANO
+#define KC_DCLICK DOUBLE_CLICK
 
 // The firmware I'm using is based on the TBK Mini keyboard, which has 6 columns
 // instead of 5.
@@ -35,25 +37,27 @@
 // clang-format on
 
 enum custom_keycodes {
-    ONESHOT_SHIFT = SAFE_RANGE,
-    ONESHOT_CTL,
-    ONESHOT_SHIFT_CTL,
+  ONESHOT_SHIFT = SAFE_RANGE,
+  ONESHOT_CTL,
+  ONESHOT_SHIFT_CTL,
+  RESET_NANO,
+  DOUBLE_CLICK,
 };
 
 enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA, MOUSE };
 
 enum oneshot_state {
-    ONESHOT_DISABLED,
-    ONESHOT_TRIGGER,
-    ONESHOT_HOLDING,
-    ONESHOT_RELEASE_AFTER_HOLD,
-    ONESHOT_RELEASE,
+  ONESHOT_DISABLED,
+  ONESHOT_TRIGGER,
+  ONESHOT_HOLDING,
+  ONESHOT_RELEASE_AFTER_HOLD,
+  ONESHOT_RELEASE,
 };
 
 struct oneshot {
-    enum oneshot_state state;
-    uint16_t timer;
-    uint16_t modifier;
+  enum oneshot_state state;
+  uint16_t timer;
+  uint16_t modifier;
 };
 
 // The time (in milliseconds) after which a mod-tap modifier is disabled.
@@ -108,9 +112,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , CTL(1), CTL(2), CTL(3), PGDOWN,        ____  , LGUI  , ____  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
-        //        ,----------+----------+----------.      .---------+----------+---------.
-                      ____   ,   ____   ,  RESET   ,         ____   ,   ____   ,   ____
-        //        '----------+----------+----------'      '---------+----------+---------'
+        //        ,----------+----------+----------.      .--------+----------+---------.
+                      ____   ,   ____   ,   ____   ,         ____  ,   ____   ,   ____
+        //        '----------+----------+----------'      '--------+----------+---------'
     ),
 
     [FUNCTION] = LAYOUT(
@@ -122,21 +126,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
               ____ ,  ____ ,  ____ ,  ____ ,  ____ ,         F11  ,  F12  ,  ____ ,  ____ ,  ____ ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
-                      ____   ,   ____   ,   XXXX   ,         ____   ,  ____  ,   ____
+                      ____   ,   ____   ,   XXXX   ,         RESET  , RESETN ,   ____
         //        '----------+----------+----------'      '---------+--------+---------'
     ),
 
     [MOUSE] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ESC  ,  NONE ,  NONE ,  NONE ,  NONE ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
+              ____ , CTL(C), CTL(V), DCLICK,  ____ ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              NONE ,  NONE ,  NONE ,  NONE ,  WH_U ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
+              ____ ,  BTN3 ,  BTN2 ,  BTN1 ,  WH_U ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              NONE , LSHIFT,  LCTL , BTN3  ,  WH_D ,         NONE ,  NONE ,  NONE ,  NONE ,  NONE ,
+              ____ ,  ____ ,  LCTL , LSHIFT,  WH_D ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // '---------------------------------------'      '---------------------------------------'
-        //        ,----------+----------+----------.      .---------+--------+---------.
-                      BTN2   ,   BTN1   ,   XXXX   ,         ____   ,  ____  ,   ____
-        //        '----------+----------+----------'      '---------+--------+---------'
+        //        ,----------+----------+----------.      .---------+-------+---------.
+                      ____   ,   ____   ,   XXXX   ,         ____   ,  ____ ,   ____
+        //        '----------+----------+----------'      '---------+-------+---------'
     ),
 };
 // clang-format on
@@ -153,91 +157,178 @@ static struct oneshot ctl_state = {
     .modifier = KC_LCTL,
 };
 
+// A flag indicating whether the num-lock LED is enabled or not.
+static bool num_lock_state = false;
+
+// A flag used to ignore the first num-lock state change when the keyboard
+// starts up. This ensures we don't enable the mouse layer upon boot just
+// because the internal and LED states differ.
+static bool num_lock_first_time = true;
+
+// The number of keys currently held down.
+static int8_t keys_held = 0;
+
+// When set to `true`, the mouse layer must be disabled when all keys are
+// released.
+static bool disable_mouse_on_release = false;
+
 bool oneshot_timer_expired(struct oneshot *state) {
-    return state->timer > 0 &&
-           (timer_elapsed(state->timer) > ONESHOT_MOD_TIMEOUT);
+  return state->timer > 0 &&
+         (timer_elapsed(state->timer) > ONESHOT_MOD_TIMEOUT);
 }
 
 void oneshot_modifier(struct oneshot *state, keyrecord_t *record) {
-    if (!record->event.pressed) {
-        if (state->state == ONESHOT_HOLDING) {
-            state->state = ONESHOT_TRIGGER;
-        } else if (state->state == ONESHOT_RELEASE_AFTER_HOLD) {
-            state->state = ONESHOT_DISABLED;
+  if (!record->event.pressed) {
+    if (state->state == ONESHOT_HOLDING) {
+      state->state = ONESHOT_TRIGGER;
+    } else if (state->state == ONESHOT_RELEASE_AFTER_HOLD) {
+      state->state = ONESHOT_DISABLED;
 
-            unregister_code(state->modifier);
-        }
-
-        return;
+      unregister_code(state->modifier);
     }
 
-    // Pressing the key again disables it.
-    if (state->state != ONESHOT_DISABLED) {
-        state->state = ONESHOT_DISABLED;
-        state->timer = 0;
+    return;
+  }
 
-        return;
-    }
+  // Pressing the key again disables it.
+  if (state->state != ONESHOT_DISABLED) {
+    state->state = ONESHOT_DISABLED;
+    state->timer = 0;
 
-    state->state = ONESHOT_HOLDING;
-    state->timer = timer_read();
+    return;
+  }
+
+  state->state = ONESHOT_HOLDING;
+  state->timer = timer_read();
 }
 
 void handle_oneshot_modifier(struct oneshot *state) {
-    if (state->state == ONESHOT_HOLDING) {
-        // We pressed a key while the modifier is still being held. In this case
-        // we'll unregister the modifier when the modifier key is released.
-        state->timer = 0;
-        state->state = ONESHOT_RELEASE_AFTER_HOLD;
+  if (state->state == ONESHOT_HOLDING) {
+    // We pressed a key while the modifier is still being held. In this case
+    // we'll unregister the modifier when the modifier key is released.
+    state->timer = 0;
+    state->state = ONESHOT_RELEASE_AFTER_HOLD;
 
-        register_code(state->modifier);
-        return;
+    register_code(state->modifier);
+    return;
+  }
+
+  if (state->state == ONESHOT_TRIGGER) {
+    // The modifier key was released before another key was pressed. In this
+    // case we'll apply (if still valid) the modifier to the next key.
+    if (oneshot_timer_expired(state)) {
+      state->timer = 0;
+      state->state = ONESHOT_DISABLED;
+
+      return;
     }
 
-    if (state->state == ONESHOT_TRIGGER) {
-        // The modifier key was released before another key was pressed. In this
-        // case we'll apply (if still valid) the modifier to the next key.
-        if (oneshot_timer_expired(state)) {
-            state->timer = 0;
-            state->state = ONESHOT_DISABLED;
+    state->state = ONESHOT_RELEASE;
 
-            return;
-        }
+    register_code(state->modifier);
+    return;
+  }
 
-        state->state = ONESHOT_RELEASE;
+  if (state->state == ONESHOT_RELEASE) {
+    state->state = ONESHOT_DISABLED;
 
-        register_code(state->modifier);
-        return;
+    unregister_code(state->modifier);
+  }
+}
+
+void keyboard_post_init_user(void) {
+  num_lock_state = host_keyboard_led_state().num_lock;
+  num_lock_first_time = true;
+}
+
+bool led_update_user(led_t led_state) {
+  if (led_state.num_lock != num_lock_state) {
+    if (num_lock_first_time) {
+      // When the keyboard starts up it might observe the states to differ, even
+      // if the Nano isn't moving. In this case we don't want to enable the
+      // mouse layer.
+      num_lock_first_time = false;
+    } else if (layer_state_is(MOUSE)) {
+      if (disable_mouse_on_release) {
+        // The Nano started moving again after it stopped moving but keys were
+        // still being held.
+        disable_mouse_on_release = false;
+      } else if (keys_held == 0) {
+        // If we are on the mouse layer but keys are still being held, we
+        // disable the layer once all keys are released. This makes it possible
+        // to e.g. start dragging a window, stop moving the cursor for a while
+        // while holding the left click button, then continue dragging by moving
+        // the cursor again.
+        layer_off(MOUSE);
+      } else {
+        disable_mouse_on_release = true;
+      }
+    } else {
+      disable_mouse_on_release = false;
+      layer_on(MOUSE);
     }
+  }
 
-    if (state->state == ONESHOT_RELEASE) {
-        state->state = ONESHOT_DISABLED;
+  num_lock_state = led_state.num_lock;
+  return true;
+}
 
-        unregister_code(state->modifier);
-    }
+void disable_mouse_layer_on_release(keyrecord_t *record) {
+  if (record->event.pressed) {
+    keys_held++;
+  } else {
+    keys_held--;
+  }
+
+  if (keys_held == 0 && disable_mouse_on_release) {
+    disable_mouse_on_release = false;
+    layer_off(MOUSE);
+  }
+}
+
+void reset_ploopy_nano(void) {
+  // One tap is to enter the bootloader mode, the other is to reset capslock
+  // back to the previous state.
+  tap_code16(KC_CAPSLOCK);
+  tap_code16(KC_CAPSLOCK);
+}
+
+void double_click(void) {
+  // Because the mouse layer is on a timer, double clicking can be a tad
+  // annoying. To fix that we can just bind a button to a double click.
+  tap_code16(KC_BTN1);
+  tap_code16(KC_BTN1);
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-    case ONESHOT_SHIFT:
-        oneshot_modifier(&shift_state, record);
-        break;
-    case ONESHOT_CTL:
-        oneshot_modifier(&ctl_state, record);
-        break;
-    case ONESHOT_SHIFT_CTL:
-        oneshot_modifier(&shift_state, record);
-        oneshot_modifier(&ctl_state, record);
-        break;
-    case KC_SYM:
-    case KC_NUMS:
-    case KC_EXTRA:
-    case KC_MOUSE:
-        break;
-    default:
-        handle_oneshot_modifier(&shift_state);
-        handle_oneshot_modifier(&ctl_state);
-    }
+  disable_mouse_layer_on_release(record);
 
-    return true;
+  switch (keycode) {
+  case ONESHOT_SHIFT:
+    oneshot_modifier(&shift_state, record);
+    break;
+  case ONESHOT_CTL:
+    oneshot_modifier(&ctl_state, record);
+    break;
+  case ONESHOT_SHIFT_CTL:
+    oneshot_modifier(&shift_state, record);
+    oneshot_modifier(&ctl_state, record);
+    break;
+  case DOUBLE_CLICK:
+    double_click();
+    break;
+  case KC_SYM:
+  case KC_NUMS:
+  case KC_EXTRA:
+  case KC_MOUSE:
+    break;
+  case RESET_NANO:
+    reset_ploopy_nano();
+    break;
+  default:
+    handle_oneshot_modifier(&shift_state);
+    handle_oneshot_modifier(&ctl_state);
+  }
+
+  return true;
 }
