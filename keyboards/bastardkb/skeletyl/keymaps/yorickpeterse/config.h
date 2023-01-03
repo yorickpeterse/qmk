@@ -40,3 +40,6 @@
 #define DEBOUNCE 5
 
 #define USB_POLLING_INTERVAL_MS 1
+
+// Caps lock is used to communicate with the Nano, so no delay is desired.
+#define TAP_HOLD_CAPS_DELAY 0

@@ -17,8 +17,10 @@
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
 #define KC_OSCTL ONESHOT_SHIFT_CTL
-#define KC_RESETN RESET_NANO
 #define KC_DCLICK DOUBLE_CLICK
+
+#define KC_NRESET NANO_RESET
+#define KC_NDPI NANO_DPI
 
 // The firmware I'm using is based on the TBK Mini keyboard, which has 6 columns
 // instead of 5.
@@ -40,8 +42,9 @@ enum custom_keycodes {
   ONESHOT_SHIFT = SAFE_RANGE,
   ONESHOT_CTL,
   ONESHOT_SHIFT_CTL,
-  RESET_NANO,
   DOUBLE_CLICK,
+  NANO_RESET,
+  NANO_DPI,
 };
 
 enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA, MOUSE };
@@ -52,6 +55,11 @@ enum oneshot_state {
   ONESHOT_HOLDING,
   ONESHOT_RELEASE_AFTER_HOLD,
   ONESHOT_RELEASE,
+};
+
+enum nano_command {
+  NANO_CMD_DPI = 1,
+  NANO_CMD_RESET = 2,
 };
 
 struct oneshot {
@@ -126,7 +134,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
               ____ ,  ____ ,  ____ ,  ____ ,  ____ ,         F11  ,  F12  ,  ____ ,  ____ ,  ____ ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
-                      ____   ,   ____   ,   XXXX   ,         RESET  , RESETN ,   ____
+                      ____   ,   ____   ,   XXXX   ,         RESET  , NRESET ,   ____
         //        '----------+----------+----------'      '---------+--------+---------'
     ),
 
@@ -134,7 +142,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // ,---------------------------------------.      ,---------------------------------------.
               ____ , CTL(C), CTL(V), DCLICK,  ____ ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ ,  BTN3 ,  BTN2 ,  BTN1 ,  WH_U ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
+              NDPI ,  BTN3 ,  BTN2 ,  BTN1 ,  WH_U ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               ____ ,  ____ ,  LCTL , LSHIFT,  WH_D ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // '---------------------------------------'      '---------------------------------------'
@@ -159,11 +167,6 @@ static struct oneshot ctl_state = {
 
 // A flag indicating whether the num-lock LED is enabled or not.
 static bool num_lock_state = false;
-
-// A flag used to ignore the first num-lock state change when the keyboard
-// starts up. This ensures we don't enable the mouse layer upon boot just
-// because the internal and LED states differ.
-static bool num_lock_first_time = true;
 
 // The number of keys currently held down.
 static int8_t keys_held = 0;
@@ -238,17 +241,11 @@ void handle_oneshot_modifier(struct oneshot *state) {
 
 void keyboard_post_init_user(void) {
   num_lock_state = host_keyboard_led_state().num_lock;
-  num_lock_first_time = true;
 }
 
 bool led_update_user(led_t led_state) {
   if (led_state.num_lock != num_lock_state) {
-    if (num_lock_first_time) {
-      // When the keyboard starts up it might observe the states to differ, even
-      // if the Nano isn't moving. In this case we don't want to enable the
-      // mouse layer.
-      num_lock_first_time = false;
-    } else if (layer_state_is(MOUSE)) {
+    if (layer_state_is(MOUSE)) {
       if (disable_mouse_on_release) {
         // The Nano started moving again after it stopped moving but keys were
         // still being held.
@@ -286,14 +283,24 @@ void disable_mouse_layer_on_release(keyrecord_t *record) {
   }
 }
 
-void reset_ploopy_nano(void) {
-  // One tap is to enter the bootloader mode, the other is to reset capslock
-  // back to the previous state.
-  tap_code16(KC_CAPSLOCK);
-  tap_code16(KC_CAPSLOCK);
+void nano_command(keyrecord_t *record, enum nano_command cmd) {
+  if (!record->event.pressed) {
+    return;
+  }
+
+  for (uint16_t i = 0; i < (uint16_t)cmd; i++) {
+    // Every pair, one tap is to enable the caps lock, and the other to disable
+    // it.
+    tap_code16(KC_CAPS_LOCK);
+    tap_code16(KC_CAPS_LOCK);
+  }
 }
 
-void double_click(void) {
+void double_click(keyrecord_t *record) {
+  if (!record->event.pressed) {
+    return;
+  }
+
   // Because the mouse layer is on a timer, double clicking can be a tad
   // annoying. To fix that we can just bind a button to a double click.
   tap_code16(KC_BTN1);
@@ -315,15 +322,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     oneshot_modifier(&ctl_state, record);
     break;
   case DOUBLE_CLICK:
-    double_click();
+    double_click(record);
     break;
   case KC_SYM:
   case KC_NUMS:
   case KC_EXTRA:
   case KC_MOUSE:
     break;
-  case RESET_NANO:
-    reset_ploopy_nano();
+  case NANO_RESET:
+    nano_command(record, NANO_CMD_RESET);
+    break;
+  case NANO_DPI:
+    nano_command(record, NANO_CMD_DPI);
     break;
   default:
     handle_oneshot_modifier(&shift_state);
