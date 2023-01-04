@@ -1,4 +1,7 @@
 #include QMK_KEYBOARD_H
+#ifdef CONSOLE_ENABLE
+#include "print.h"
+#endif
 
 #define KC_____ KC_TRNS
 #define KC_XXXX KC_TRNS
@@ -301,9 +304,17 @@ void double_click(keyrecord_t *record) {
     return;
   }
 
+#ifdef CONSOLE_ENABLE
+  print("Double clicking the left mouse button\n");
+#endif
+
   // Because the mouse layer is on a timer, double clicking can be a tad
   // annoying. To fix that we can just bind a button to a double click.
   tap_code16(KC_BTN1);
+
+  // We need to wait a little between the taps, otherwise only one tap is
+  // registered. I'm not sure if that's an OS or QMK issue.
+  wait_ms(50);
   tap_code16(KC_BTN1);
 }
 
