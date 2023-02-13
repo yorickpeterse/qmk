@@ -21,9 +21,6 @@ static bool caps_waiting = false;
 static bool caps_state = false;
 static uint16_t caps_count = 0;
 
-static bool cursor = false;
-static uint16_t cursor_timer = 0;
-
 // Ploopy's cycle_dpi() seems a bit dodgy and defaults to an inconsistent value.
 // Perhaps I wrote the wrong value to the EEPROM at some point, but I haven't
 // been able to figure this out.
@@ -96,20 +93,4 @@ bool led_update_user(led_t led_state) {
 
   caps_state = led_state.caps_lock;
   return true;
-}
-
-report_mouse_t pointing_device_task_user(report_mouse_t report) {
-  if (report.x || report.y) {
-    cursor_timer = timer_read();
-
-    if (!cursor) {
-      cursor = true;
-      tap_code16(KC_NUMLOCK);
-    }
-  } else if (cursor && timer_elapsed(cursor_timer) > CURSOR_TIMEOUT) {
-    cursor = false;
-    tap_code16(KC_NUMLOCK);
-  }
-
-  return report;
 }

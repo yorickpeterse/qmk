@@ -1,7 +1,4 @@
 #include QMK_KEYBOARD_H
-#ifdef CONSOLE_ENABLE
-#include "print.h"
-#endif
 
 #define KC_____ KC_TRNS
 #define KC_XXXX KC_TRNS
@@ -147,7 +144,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               NDPI ,  BTN3 ,  BTN2 ,  BTN1 ,  WH_U ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ ,  ____ ,  LCTL , LSHIFT,  WH_D ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
+              ____ , LSHIFT,  LCTL , ____  ,  WH_D ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+-------+---------.
                       ____   ,   ____   ,   XXXX   ,         ____   ,  ____ ,   ____
@@ -167,16 +164,6 @@ static struct oneshot ctl_state = {
     .timer = 0,
     .modifier = KC_LCTL,
 };
-
-// A flag indicating whether the num-lock LED is enabled or not.
-static bool num_lock_state = false;
-
-// The number of keys currently held down.
-static int8_t keys_held = 0;
-
-// When set to `true`, the mouse layer must be disabled when all keys are
-// released.
-static bool disable_mouse_on_release = false;
 
 bool oneshot_timer_expired(struct oneshot *state) {
   return state->timer > 0 &&
@@ -242,50 +229,6 @@ void handle_oneshot_modifier(struct oneshot *state) {
   }
 }
 
-void keyboard_post_init_user(void) {
-  num_lock_state = host_keyboard_led_state().num_lock;
-}
-
-bool led_update_user(led_t led_state) {
-  if (led_state.num_lock != num_lock_state) {
-    if (layer_state_is(MOUSE)) {
-      if (disable_mouse_on_release) {
-        // The Nano started moving again after it stopped moving but keys were
-        // still being held.
-        disable_mouse_on_release = false;
-      } else if (keys_held == 0) {
-        // If we are on the mouse layer but keys are still being held, we
-        // disable the layer once all keys are released. This makes it possible
-        // to e.g. start dragging a window, stop moving the cursor for a while
-        // while holding the left click button, then continue dragging by moving
-        // the cursor again.
-        layer_off(MOUSE);
-      } else {
-        disable_mouse_on_release = true;
-      }
-    } else {
-      disable_mouse_on_release = false;
-      layer_on(MOUSE);
-    }
-  }
-
-  num_lock_state = led_state.num_lock;
-  return true;
-}
-
-void disable_mouse_layer_on_release(keyrecord_t *record) {
-  if (record->event.pressed) {
-    keys_held++;
-  } else {
-    keys_held--;
-  }
-
-  if (keys_held == 0 && disable_mouse_on_release) {
-    disable_mouse_on_release = false;
-    layer_off(MOUSE);
-  }
-}
-
 void nano_command(keyrecord_t *record, enum nano_command cmd) {
   if (!record->event.pressed) {
     return;
@@ -304,12 +247,6 @@ void double_click(keyrecord_t *record) {
     return;
   }
 
-#ifdef CONSOLE_ENABLE
-  print("Double clicking the left mouse button\n");
-#endif
-
-  // Because the mouse layer is on a timer, double clicking can be a tad
-  // annoying. To fix that we can just bind a button to a double click.
   tap_code16(KC_BTN1);
 
   // We need to wait a little between the taps, otherwise only one tap is
@@ -319,8 +256,6 @@ void double_click(keyrecord_t *record) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  disable_mouse_layer_on_release(record);
-
   switch (keycode) {
   case ONESHOT_SHIFT:
     oneshot_modifier(&shift_state, record);
