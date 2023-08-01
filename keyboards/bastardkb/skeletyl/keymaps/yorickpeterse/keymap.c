@@ -13,7 +13,7 @@
 #define KC_LOCK LCTL(LALT(KC_DEL))
 #define KC_CTL(KEY) LCTL(KC_##KEY)
 #define KC_GUI(KEY) LGUI(KC_##KEY)
-#define KC_RESET RESET
+#define KC_RESET QK_BOOT
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
 #define KC_OSCTL ONESHOT_SHIFT_CTL
@@ -90,9 +90,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // ,---------------------------------------.      ,---------------------------------------.
              EXLM  , QUES  , LPRN  , RPRN  , LABK  ,        RABK  , MINUS , EQUAL , PLUS  , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             PIPE  , AT    , LCBR  , RCBR  , SLASH ,        SCOLON, UNDS  , QUOTE , DQUO  , GRAVE ,
+             PIPE  , AT    , LCBR  , RCBR  , SLASH ,        SCLN  , UNDS  , QUOTE , DQUO  , GRAVE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             CIRC  , HASH  , LBRC  , RBRC  , BSLASH,        COLN  , AMPR  , PERC  , DLR   , TILD  ,
+             CIRC  , HASH  , LBRC  , RBRC  , BSLS  ,        COLN  , AMPR  , PERC  , DLR   , TILD  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+----------+---------.
                       ____   ,   ____   ,   ____   ,         ____   ,   ____   ,  XXXX
@@ -105,7 +105,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ , BSPACE, OSCTL ,  DEL  , ____  ,
+              ____ ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ , BSPC  , OSCTL ,  DEL  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       XXXX   ,   ____   ,   ____   ,         ____   ,  ENT   ,  EXTRA
@@ -118,7 +118,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , CTL(1), CTL(2), CTL(3), PGDOWN,        ____  , LGUI  , ____  , ____  , ____  ,
+             ____  , CTL(1), CTL(2), CTL(3), PGDN  ,        ____  , LGUI  , ____  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .--------+----------+---------.
                       ____   ,   ____   ,   ____   ,         ____  ,   ____   ,   ____
@@ -144,7 +144,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               NDPI ,  BTN3 ,  BTN2 ,  BTN1 ,  WH_U ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ , LSHIFT,  LCTL , ____  ,  WH_D ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
+              ____ , LSFT  ,  LCTL , ____  ,  WH_D ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+-------+---------.
                       ____   ,   ____   ,   XXXX   ,         ____   ,  ____ ,   ____
@@ -156,7 +156,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 static struct oneshot shift_state = {
     .state = ONESHOT_DISABLED,
     .timer = 0,
-    .modifier = KC_LSHIFT,
+    .modifier = KC_LSFT,
 };
 
 static struct oneshot ctl_state = {
