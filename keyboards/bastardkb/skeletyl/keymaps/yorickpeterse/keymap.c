@@ -17,11 +17,6 @@
 #define KC_RESET QK_BOOT
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
-#define KC_OSCTL ONESHOT_SHIFT_CTL
-#define KC_DCLICK DOUBLE_CLICK
-
-#define KC_NRESET NANO_RESET
-#define KC_NDPI NANO_DPI
 
 // The firmware I'm using is based on the TBK Mini keyboard, which has 6 columns
 // instead of 5.
@@ -42,10 +37,6 @@
 enum custom_keycodes {
   ONESHOT_SHIFT = SAFE_RANGE,
   ONESHOT_CTL,
-  ONESHOT_SHIFT_CTL,
-  DOUBLE_CLICK,
-  NANO_RESET,
-  NANO_DPI,
 };
 
 enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA, MOUSE };
@@ -56,11 +47,6 @@ enum oneshot_state {
   ONESHOT_HOLDING,
   ONESHOT_RELEASE_AFTER_HOLD,
   ONESHOT_RELEASE,
-};
-
-enum nano_command {
-  NANO_CMD_DPI = 1,
-  NANO_CMD_RESET = 2,
 };
 
 struct oneshot {
@@ -106,7 +92,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ , BSPC  , OSCTL ,  DEL  , ____  ,
+              ____ ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ , BSPC  ,  DEL  ,  ____ , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       XXXX   ,   ____   ,   ____   ,         ____   ,  ENT   ,  EXTRA
@@ -128,7 +114,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [FUNCTION] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ____ ,  ____ ,  ____ ,  ____ ,  ____ ,        RESET , NRESET,  ____ ,  ____ ,  PSCR ,
+              ____ ,  ____ ,  ____ ,  ____ ,  ____ ,        RESET , ____  ,  ____ ,  ____ ,  PSCR ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               F1   ,  F2   ,  F3   ,  F4   ,  F5   ,         F6   ,  F7   ,  F8   ,  F9   ,  F10  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -141,7 +127,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [MOUSE] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ____ , CTL(C), CTL(V), DCLICK,  ____ ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
+              ____ , CTL(C), CTL(V), ____  ,  ____ ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               ____ ,  BTN3 ,  BTN2 ,  BTN1 ,  WH_U ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -230,32 +216,6 @@ void handle_oneshot_modifier(struct oneshot *state) {
   }
 }
 
-void nano_command(keyrecord_t *record, enum nano_command cmd) {
-  if (!record->event.pressed) {
-    return;
-  }
-
-  for (uint16_t i = 0; i < (uint16_t)cmd; i++) {
-    // Every pair, one tap is to enable the caps lock, and the other to disable
-    // it.
-    tap_code16(KC_CAPS_LOCK);
-    tap_code16(KC_CAPS_LOCK);
-  }
-}
-
-void double_click(keyrecord_t *record) {
-  if (!record->event.pressed) {
-    return;
-  }
-
-  tap_code16(KC_BTN1);
-
-  // We need to wait a little between the taps, otherwise only one tap is
-  // registered. I'm not sure if that's an OS or QMK issue.
-  wait_ms(50);
-  tap_code16(KC_BTN1);
-}
-
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
   case ONESHOT_SHIFT:
@@ -264,23 +224,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   case ONESHOT_CTL:
     oneshot_modifier(&ctl_state, record);
     break;
-  case ONESHOT_SHIFT_CTL:
-    oneshot_modifier(&shift_state, record);
-    oneshot_modifier(&ctl_state, record);
-    break;
-  case DOUBLE_CLICK:
-    double_click(record);
-    break;
   case KC_SYM:
   case KC_NUMS:
   case KC_EXTRA:
   case KC_MOUSE:
-    break;
-  case NANO_RESET:
-    nano_command(record, NANO_CMD_RESET);
-    break;
-  case NANO_DPI:
-    nano_command(record, NANO_CMD_DPI);
     break;
   default:
     handle_oneshot_modifier(&shift_state);
