@@ -1,3 +1,4 @@
+#include <sys/types.h>
 #include QMK_KEYBOARD_H
 
 #define KC_____ KC_TRNS
@@ -17,6 +18,7 @@
 #define KC_RESET QK_BOOT
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
+#define KC_CSPC COMMA_SPACE
 
 // The firmware I'm using is based on the TBK Mini keyboard, which has 6 columns
 // instead of 5.
@@ -37,6 +39,7 @@
 enum custom_keycodes {
   ONESHOT_SHIFT = SAFE_RANGE,
   ONESHOT_CTL,
+  COMMA_SPACE,
 };
 
 enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA, MOUSE };
@@ -92,7 +95,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ , BSPC  ,  ____ ,  ____ ,  DEL  ,
+              ____ ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ , BSPC  ,  CSPC ,  ____ ,  DEL  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       XXXX   ,   ____   ,   ____   ,         ____   ,  ENT   ,  EXTRA
@@ -216,6 +219,13 @@ void handle_oneshot_modifier(struct oneshot *state) {
   }
 }
 
+void comma_space(keyrecord_t *record) {
+  if (record->event.pressed) {
+    tap_code(KC_COMMA);
+    tap_code(KC_SPC);
+  }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
   case ONESHOT_SHIFT:
@@ -224,6 +234,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   case ONESHOT_CTL:
     oneshot_modifier(&ctl_state, record);
     break;
+  case COMMA_SPACE:
+    comma_space(record);
   case KC_SYM:
   case KC_NUMS:
   case KC_EXTRA:
