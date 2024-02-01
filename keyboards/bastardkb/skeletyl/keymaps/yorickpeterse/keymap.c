@@ -1,3 +1,5 @@
+#include "action.h"
+#include "action_util.h"
 #include <sys/types.h>
 #include QMK_KEYBOARD_H
 
@@ -44,17 +46,16 @@ enum custom_keycodes {
 
 enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA, MOUSE };
 
-enum oneshot_state {
-  ONESHOT_DISABLED,
-  ONESHOT_TRIGGER,
-  ONESHOT_HOLDING,
-  ONESHOT_RELEASE_AFTER_HOLD,
-  ONESHOT_RELEASE,
+enum oneshot_status {
+  OS_DISABLED,
+  OS_HOLDING,
+  OS_RELEASED,
+  OS_OTHER_KEY_PRESSED,
+  OS_DISABLE,
 };
 
-struct oneshot {
-  enum oneshot_state state;
-  uint16_t timer;
+struct oneshot_state {
+  enum oneshot_status status;
   uint16_t modifier;
 };
 
@@ -143,80 +144,75 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 // clang-format on
 
-static struct oneshot shift_state = {
-    .state = ONESHOT_DISABLED,
-    .timer = 0,
+struct oneshot_state shift_state = {
+    .status = OS_DISABLED,
     .modifier = KC_LSFT,
 };
 
-static struct oneshot ctl_state = {
-    .state = ONESHOT_DISABLED,
-    .timer = 0,
+struct oneshot_state ctl_state = {
+    .status = OS_DISABLED,
     .modifier = KC_LCTL,
 };
 
-bool oneshot_timer_expired(struct oneshot *state) {
-  return state->timer > 0 &&
-         (timer_elapsed(state->timer) > ONESHOT_MOD_TIMEOUT);
-}
-
-void oneshot_modifier(struct oneshot *state, keyrecord_t *record) {
-  if (!record->event.pressed) {
-    if (state->state == ONESHOT_HOLDING) {
-      state->state = ONESHOT_TRIGGER;
-    } else if (state->state == ONESHOT_RELEASE_AFTER_HOLD) {
-      state->state = ONESHOT_DISABLED;
-
+void oneshot(struct oneshot_state *state, keyrecord_t *record) {
+  if (record->event.pressed) {
+    state->status = OS_HOLDING;
+    register_code(state->modifier);
+  } else {
+    switch (state->status) {
+    // Nothing pressed after the key down, so schedule the modifier for the
+    // next key.
+    case OS_HOLDING:
+      state->status = OS_RELEASED;
+      break;
+    // Another key was pressed, so we treat the key as a normal modifier you
+    // need to hold down.
+    case OS_OTHER_KEY_PRESSED:
+      state->status = OS_DISABLED;
       unregister_code(state->modifier);
+      break;
+    default:
+      break;
     }
-
-    return;
   }
-
-  // Pressing the key again disables it.
-  if (state->state != ONESHOT_DISABLED) {
-    state->state = ONESHOT_DISABLED;
-    state->timer = 0;
-
-    return;
-  }
-
-  state->state = ONESHOT_HOLDING;
-  state->timer = timer_read();
 }
 
-void handle_oneshot_modifier(struct oneshot *state) {
-  if (state->state == ONESHOT_HOLDING) {
-    // We pressed a key while the modifier is still being held. In this case
-    // we'll unregister the modifier when the modifier key is released.
-    state->timer = 0;
-    state->state = ONESHOT_RELEASE_AFTER_HOLD;
-
-    register_code(state->modifier);
-    return;
-  }
-
-  if (state->state == ONESHOT_TRIGGER) {
-    // The modifier key was released before another key was pressed. In this
-    // case we'll apply (if still valid) the modifier to the next key.
-    if (oneshot_timer_expired(state)) {
-      state->timer = 0;
-      state->state = ONESHOT_DISABLED;
-
-      return;
+void after_oneshot(struct oneshot_state *state, keyrecord_t *record) {
+  if (record->event.pressed) {
+    switch (state->status) {
+    // If the modifier is held down, signal that another key is pressed.
+    case OS_HOLDING:
+      state->status = OS_OTHER_KEY_PRESSED;
+      break;
+    // If we are the first key down event after releasing the modifier (without
+    // pressing another key), we'll be responsible for clearing the modifier.
+    // This way the sequence `MOD -> A -> B` results in MOD only applying to A,
+    // instead of applying to both A and B.
+    case OS_RELEASED:
+      state->status = OS_DISABLE;
+      break;
+    // If another key was pressed but is still held down, we need to disable the
+    // modifier _first_ such that it only applies to the initially pressed key.
+    case OS_DISABLE:
+      state->status = OS_DISABLED;
+      unregister_code(state->modifier);
+    default:
+      break;
     }
-
-    state->state = ONESHOT_RELEASE;
-
-    register_code(state->modifier);
-    return;
+  } else {
+    switch (state->status) {
+    case OS_DISABLE:
+      state->status = OS_DISABLED;
+      unregister_code(state->modifier);
+    default:
+      break;
+    }
   }
+}
 
-  if (state->state == ONESHOT_RELEASE) {
-    state->state = ONESHOT_DISABLED;
-
-    unregister_code(state->modifier);
-  }
+void reset_oneshot(struct oneshot_state *state) {
+  state->status = OS_DISABLED;
+  unregister_code(state->modifier);
 }
 
 void comma_space(keyrecord_t *record) {
@@ -228,22 +224,28 @@ void comma_space(keyrecord_t *record) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
-  case ONESHOT_SHIFT:
-    oneshot_modifier(&shift_state, record);
-    break;
-  case ONESHOT_CTL:
-    oneshot_modifier(&ctl_state, record);
-    break;
   case COMMA_SPACE:
     comma_space(record);
+    break;
+  case ONESHOT_SHIFT:
+    oneshot(&shift_state, record);
+    break;
+  case ONESHOT_CTL:
+    oneshot(&ctl_state, record);
+    break;
   case KC_SYM:
   case KC_NUMS:
   case KC_EXTRA:
   case KC_MOUSE:
     break;
+  case KC_ESC:
+    reset_oneshot(&shift_state);
+    reset_oneshot(&ctl_state);
+    break;
   default:
-    handle_oneshot_modifier(&shift_state);
-    handle_oneshot_modifier(&ctl_state);
+    after_oneshot(&shift_state, record);
+    after_oneshot(&ctl_state, record);
+    break;
   }
 
   return true;
