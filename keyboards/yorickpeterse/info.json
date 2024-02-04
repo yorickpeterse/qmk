@@ -1,0 +1,8 @@
+{
+    "manufacturer": "Yorick Peterse",
+    "maintainer": "Yorick Peterse",
+    "url": "https://yorickpeterse.com",
+    "usb": {
+        "vid": "0xA8F8"
+    }
+}

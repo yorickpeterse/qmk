@@ -1,0 +1,23 @@
+{
+    "keyboard_name": "Skeletyl handwired",
+    "usb": {
+        "device_version": "2.0.0"
+    },
+    "rgb_matrix": {
+        "driver": "ws2812"
+    },
+    "matrix_pins": {
+        "cols": ["GP4", "GP5", "GP6", "GP7", "GP8"],
+        "rows": ["GP21", "GP29", "GP28", "GP27"]
+    },
+    "diode_direction": "COL2ROW",
+    "split": {
+        "soft_serial_pin": "GP1"
+    },
+    "ws2812": {
+        "pin": "GP0",
+        "driver": "vendor"
+    },
+    "processor": "RP2040",
+    "bootloader": "rp2040"
+}
