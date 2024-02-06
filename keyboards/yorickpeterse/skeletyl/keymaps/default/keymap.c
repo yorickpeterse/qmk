@@ -50,7 +50,7 @@ struct oneshot_state {
   KC_##L00, KC_##L01, KC_##L02, KC_##L03, KC_##L04,     KC_##R00, KC_##R01, KC_##R02, KC_##R03, KC_##R04, \
   KC_##L05, KC_##L06, KC_##L07, KC_##L08, KC_##L09,     KC_##R05, KC_##R06, KC_##R07, KC_##R08, KC_##R09, \
   KC_##L10, KC_##L11, KC_##L12, KC_##L13, KC_##L14,     KC_##R10, KC_##R11, KC_##R12, KC_##R13, KC_##R14, \
-                      KC_##L15, KC_##L16, KC_##L17,     KC_##R15, KC_##R16, KC_##R17            \
+                      KC_##L15, KC_##L16, KC_##L17,     KC_##R15, KC_##R16, KC_##R17                      \
 )
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -239,10 +239,4 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
 
   return true;
-}
-
-// TODO: remove
-void keyboard_post_init_user(void) {
-  debug_enable = true;
-  debug_matrix = true;
 }

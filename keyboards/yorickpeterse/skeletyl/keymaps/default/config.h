@@ -13,9 +13,6 @@
 #define QMK_KEYS_PER_SCAN 4
 #define TAPPING_TERM 200
 
-#define RGBLIGHT_SPLIT
-#define RGBLIGHT_DEFAULT_VAL RGBLIGHT_LIMIT_VAL / 2
-
 #define COMBO_TERM 50
 #define COMBO_COUNT 0
 
@@ -34,10 +31,5 @@
 #define MOUSEKEY_WHEEL_MAX_SPEED 4
 #define MOUSEKEY_WHEEL_TIME_TO_MAX 80
 
-// Changing the debounce time requires flashing both halves separately.
 #define DEBOUNCE 5
-
 #define USB_POLLING_INTERVAL_MS 1
-
-// Caps lock is used to communicate with the Nano, so no delay is desired.
-#define TAP_HOLD_CAPS_DELAY 0
