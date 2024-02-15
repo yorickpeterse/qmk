@@ -18,10 +18,12 @@
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
 #define KC_CSPC COMMA_SPACE
+#define KC_OSCTL ONESHOT_SHIFT_CTL
 
 enum custom_keycodes {
   ONESHOT_SHIFT = SAFE_RANGE,
   ONESHOT_CTL,
+  ONESHOT_SHIFT_CTL,
   COMMA_SPACE,
 };
 
@@ -86,7 +88,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ , BSPC  ,  CSPC ,  ____ ,  DEL  ,
+             ____  ,  LALT , OCTL  ,  TAB  ,  STAB ,         OSCTL, BSPC  ,  CSPC ,  ____ ,  DEL  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       XXXX   ,   ____   ,   ____   ,         ____   ,  ENT   ,  EXTRA
@@ -222,6 +224,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     break;
   case ONESHOT_CTL:
     oneshot(&ctl_state, record);
+    break;
+  case ONESHOT_SHIFT_CTL:
+    oneshot(&ctl_state, record);
+    oneshot(&shift_state, record);
     break;
   case KC_SYM:
   case KC_NUMS:
