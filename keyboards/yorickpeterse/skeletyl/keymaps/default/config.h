@@ -14,7 +14,6 @@
 #define TAPPING_TERM 200
 
 #define COMBO_TERM 50
-#define COMBO_COUNT 0
 
 #define MK_KINETIC_SPEED
 #define MOUSEKEY_INTERVAL 16
