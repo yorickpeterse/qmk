@@ -3,7 +3,7 @@
 #define KC_____ KC_TRNS
 #define KC_XXXX KC_TRNS
 #define KC_NONE KC_NO
-#define KC_SYM MO(SYMBOLS)
+#define KC_SYM ONESHOT_SYMBOLS
 #define KC_NUMS MO(NUMBERS)
 #define KC_MOUSE TG(MOUSE)
 #define KC_STAB LSFT(KC_TAB)
@@ -24,6 +24,7 @@ enum custom_keycodes {
   ONESHOT_SHIFT = SAFE_RANGE,
   ONESHOT_CTL,
   ONESHOT_SHIFT_CTL,
+  ONESHOT_SYMBOLS,
   COMMA_SPACE,
 };
 
@@ -39,7 +40,8 @@ enum oneshot_status {
 
 struct oneshot_state {
   enum oneshot_status status;
-  uint16_t modifier;
+  bool layer;
+  uint16_t key;
 };
 
 // clang-format off
@@ -138,18 +140,31 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 struct oneshot_state shift_state = {
     .status = OS_DISABLED,
-    .modifier = KC_LSFT,
+    .layer = false,
+    .key = KC_LSFT,
 };
 
 struct oneshot_state ctl_state = {
     .status = OS_DISABLED,
-    .modifier = KC_LCTL,
+    .layer = false,
+    .key = KC_LCTL,
+};
+
+struct oneshot_state symbols_state = {
+    .status = OS_DISABLED,
+    .layer = true,
+    .key = SYMBOLS,
 };
 
 void oneshot(struct oneshot_state *state, keyrecord_t *record) {
   if (record->event.pressed) {
     state->status = OS_HOLDING;
-    register_code(state->modifier);
+
+    if (state->layer) {
+      layer_on(state->key);
+    } else {
+      register_code(state->key);
+    }
   } else {
     switch (state->status) {
     // Nothing pressed after the key down, so schedule the modifier for the
@@ -161,7 +176,12 @@ void oneshot(struct oneshot_state *state, keyrecord_t *record) {
     // need to hold down.
     case OS_OTHER_KEY_PRESSED:
       state->status = OS_DISABLED;
-      unregister_code(state->modifier);
+
+      if (state->layer) {
+        layer_off(state->key);
+      } else {
+        unregister_code(state->key);
+      }
       break;
     default:
       break;
@@ -187,7 +207,12 @@ void after_oneshot(struct oneshot_state *state, keyrecord_t *record) {
     // modifier _first_ such that it only applies to the initially pressed key.
     case OS_DISABLE:
       state->status = OS_DISABLED;
-      unregister_code(state->modifier);
+
+      if (state->layer) {
+        layer_off(state->key);
+      } else {
+        unregister_code(state->key);
+      }
     default:
       break;
     }
@@ -195,7 +220,12 @@ void after_oneshot(struct oneshot_state *state, keyrecord_t *record) {
     switch (state->status) {
     case OS_DISABLE:
       state->status = OS_DISABLED;
-      unregister_code(state->modifier);
+
+      if (state->layer) {
+        layer_off(state->key);
+      } else {
+        unregister_code(state->key);
+      }
     default:
       break;
     }
@@ -204,7 +234,12 @@ void after_oneshot(struct oneshot_state *state, keyrecord_t *record) {
 
 void reset_oneshot(struct oneshot_state *state) {
   state->status = OS_DISABLED;
-  unregister_code(state->modifier);
+
+  if (state->layer) {
+    layer_off(state->key);
+  } else {
+    unregister_code(state->key);
+  }
 }
 
 void comma_space(keyrecord_t *record) {
@@ -229,7 +264,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     oneshot(&ctl_state, record);
     oneshot(&shift_state, record);
     break;
-  case KC_SYM:
+  case ONESHOT_SYMBOLS:
+    oneshot(&symbols_state, record);
+    break;
   case KC_NUMS:
   case KC_EXTRA:
   case KC_MOUSE:
@@ -237,10 +274,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   case KC_ESC:
     reset_oneshot(&shift_state);
     reset_oneshot(&ctl_state);
+    reset_oneshot(&symbols_state);
     break;
   default:
     after_oneshot(&shift_state, record);
     after_oneshot(&ctl_state, record);
+    after_oneshot(&symbols_state, record);
     break;
   }
 
