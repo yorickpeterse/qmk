@@ -17,14 +17,12 @@
 #define KC_RESET QK_BOOT
 #define KC_OCTL ONESHOT_CTL
 #define KC_OSHIFT ONESHOT_SHIFT
-#define KC_CSPC COMMA_SPACE
 #define KC_OSCTL ONESHOT_SHIFT_CTL
 
 enum custom_keycodes {
   ONESHOT_SHIFT = SAFE_RANGE,
   ONESHOT_CTL,
   ONESHOT_SHIFT_CTL,
-  COMMA_SPACE,
 };
 
 enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, EXTRA, MOUSE };
@@ -84,11 +82,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [NUMBERS] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ESC  , ____  , OSCTL , ____  ,  ____ ,         INS  , ____  , ____  , ____  , ____  ,
+              ESC  , ____  , ____  , ____  ,  ____ ,         INS  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  ,  LALT , OCTL  ,  TAB  ,  STAB ,         ____ ,  BSPC ,  CSPC ,  ____ ,  DEL  ,
+             ____  ,  LALT , OCTL  ,  TAB  , ____  ,         ____ ,  BSPC ,  OSCTL,  ____ ,  DEL  ,
         // '---------------------------------------'      '---------------------------------------'
         //        ,----------+----------+----------.      .---------+--------+---------.
                       XXXX   ,   ____   ,   ____   ,         ____   ,  ENT   ,  EXTRA
@@ -207,18 +205,8 @@ void reset_oneshot(struct oneshot_state *state) {
   unregister_code(state->modifier);
 }
 
-void comma_space(keyrecord_t *record) {
-  if (record->event.pressed) {
-    tap_code(KC_COMMA);
-    tap_code(KC_SPC);
-  }
-}
-
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
-  case COMMA_SPACE:
-    comma_space(record);
-    break;
   case ONESHOT_SHIFT:
     oneshot(&shift_state, record);
     break;
