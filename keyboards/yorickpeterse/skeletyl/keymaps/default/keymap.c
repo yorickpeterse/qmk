@@ -41,10 +41,10 @@ struct oneshot_state {
   uint16_t modifier;
 };
 
-const uint16_t PROGMEM dot_combo[] = {KC_X, KC_C, COMBO_END};
+const uint16_t PROGMEM xc_combo[] = {KC_X, KC_C, COMBO_END};
 
 combo_t key_combos[] = {
-    COMBO(dot_combo, ONESHOT_CTL),
+    COMBO(xc_combo, ONESHOT_CTL),
 };
 
 // clang-format off
