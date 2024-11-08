@@ -6,8 +6,8 @@
 #define KC_XXXX KC_TRNS
 #define KC_NONE KC_NO
 #define KC_NORM TO(NORMAL)
-#define KC_SYM MO(SYMBOLS)
-#define KC_NUMS MO(NUMBERS)
+#define KC_PRIM MO(PRIMARY)
+#define KC_SECON MO(SECONDARY)
 #define KC_MOUSE TO(MOUSE)
 #define KC_STAB LSFT(KC_TAB)
 #define KC_FUN OSL(FUNCTION)
@@ -27,7 +27,7 @@ enum custom_keycodes {
   ONESHOT_CTL,
 };
 
-enum layer { NORMAL, SYMBOLS, NUMBERS, FUNCTION, NAV, MOUSE };
+enum layer { NORMAL, PRIMARY, SECONDARY, FUNCTION, NAV, MOUSE };
 
 enum oneshot_status {
   OS_DISABLED,
@@ -71,11 +71,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                Z   ,   X   ,   C   ,   D   ,   V   ,          K   ,   H   , COMMA ,  DOT  , CAPS  ,
         // '---------------------------------------'      '---------------------------------------'
         //               ,-------+---------+-------.      .--------+----------+-------.
-                            NUMS ,  SPACE  , ____  ,          FUN  ,  OSHIFT  ,  SYM
+                           SECON ,  SPACE  , ____  ,          FUN  ,  OSHIFT  , PRIM
         //               '-------+---------+-------'      '--------+----------+-------'
     ),
 
-    [SYMBOLS] = LAYOUT(
+    [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
              EXLM  , QUES  , LPRN  , RPRN  , LABK  ,        RABK  , MINUS , EQUAL , PLUS  , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -88,9 +88,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         //        '----------+----------+----------'      '---------+----------+---------'
     ),
 
-    [NUMBERS] = LAYOUT(
+    [SECONDARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ESC  , ____  , ____  , ____  ,  ____ ,         ____ , ____  , ____  , ____  ,  ____ ,
+              ESC  , ____  , ____  , MOUSE ,  ____ ,         ____ , ____  , ____  , ____  ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -103,7 +103,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [NAV] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , UP    , MOUSE , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
+             ____  , ____  , UP    , ____  , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -221,8 +221,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   case ONESHOT_CTL:
     oneshot(&ctl_state, record);
     break;
-  case KC_SYM:
-  case KC_NUMS:
+  case KC_PRIM:
+  case KC_SECON:
   case KC_NAV:
   case KC_MOUSE:
     break;
