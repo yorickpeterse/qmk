@@ -43,11 +43,9 @@ struct oneshot_state {
 };
 
 const uint16_t PROGMEM ctl_combo[] = {KC_X, KC_C, COMBO_END};
-const uint16_t PROGMEM esc_combo[] = {KC_DOT, KC_COMMA, COMBO_END};
 
 combo_t key_combos[] = {
     COMBO(ctl_combo, ONESHOT_CTL),
-    COMBO(esc_combo, KC_ESC),
 };
 
 // clang-format off
@@ -92,7 +90,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [SECONDARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , ____  , MOUSE ,  ____ ,         ____ , ____  , ____  , ____  ,  ____ ,
+              ESC  , ____  , ____  , MOUSE ,  ____ ,         ____ , ____  , ____  , ____  ,  ____ ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
