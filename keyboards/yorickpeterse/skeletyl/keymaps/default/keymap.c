@@ -77,9 +77,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             EXLM  , QUES  , LPRN  , STAB  , SLASH ,        RALT  , EQUAL , RPRN  , PLUS  , ASTR  ,
+             EXLM  , QUES  , LPRN  , STAB  , AT    ,        RALT  , EQUAL , RPRN  , PLUS  , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             PIPE  , AT    , LCBR  , MINUS , LABK  ,        RABK  , UNDS  , RCBR  , QUOTE , BSLS  ,
+             BSLS  , SLASH , LCBR  , MINUS , LABK  ,        RABK  , UNDS  , RCBR  , QUOTE , PIPE  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              AMPR  , HASH  , LBRC  , TAB   , SCLN  ,        COLN  , ENTER , RBRC  , DQUO  , TILD  ,
         // '---------------------------------------'      '---------------------------------------'
