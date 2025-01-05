@@ -6,12 +6,10 @@
 #define KC_XXXX KC_TRNS
 #define KC_NONE KC_NO
 #define KC_NORM TO(NORMAL)
-#define KC_PRIM MO(PRIMARY)
+#define KC_PRIM OSL(PRIMARY)
 #define KC_SECON MO(SECONDARY)
 #define KC_MOUSE TO(MOUSE)
-#define KC_STAB LSFT(KC_TAB)
-#define KC_FUN OSL(FUNCTION)
-#define KC_NAV MO(NAV)
+#define KC_FUN MO(FUNCTION)
 #define KC_FULL LALT(KC_F11)
 #define KC_LOCK LCTL(LALT(KC_DEL))
 #define KC_CTL(KEY) LCTL(KC_##KEY)
@@ -19,15 +17,15 @@
 #define KC_GUI(KEY) LGUI(KC_##KEY)
 #define KC_RESET QK_BOOT
 #define KC_OCTL ONESHOT_CTL
-#define KC_OSHIFT ONESHOT_SHIFT
 #define KC_CAPS CW_TOGG
+#define KC_OSFT ONESHOT_SFT
 
 enum custom_keycodes {
-  ONESHOT_SHIFT = SAFE_RANGE,
+  ONESHOT_SFT = SAFE_RANGE,
   ONESHOT_CTL,
 };
 
-enum layer { NORMAL, PRIMARY, SECONDARY, FUNCTION, NAV, MOUSE };
+enum layer { NORMAL, PRIMARY, SECONDARY, FUNCTION, MOUSE };
 
 enum oneshot_status {
   OS_DISABLED,
@@ -42,23 +40,59 @@ struct oneshot_state {
   uint16_t modifier;
 };
 
-const uint16_t PROGMEM ctl_combo[] = {KC_X, KC_C, COMBO_END};
+// clang-format off
+const uint16_t PROGMEM combo_xc[] = {KC_X, KC_C, COMBO_END};
+const uint16_t PROGMEM combo_dot_comma[] = {KC_DOT, KC_COMMA, COMBO_END};
+const uint16_t PROGMEM combo_fp[] = {KC_F, KC_P, COMBO_END};
+const uint16_t PROGMEM combo_ul[] = {KC_U, KC_L, COMBO_END};
+const uint16_t PROGMEM combo_st[] = {KC_S, KC_T, COMBO_END};
+const uint16_t PROGMEM combo_en[] = {KC_E, KC_N, COMBO_END};
+const uint16_t PROGMEM combo_cd[] = {KC_C, KC_D, COMBO_END};
+const uint16_t PROGMEM combo_comma_h[] = {KC_COMMA, KC_H, COMBO_END};
+const uint16_t PROGMEM combo_jl[] = {KC_J, KC_L, COMBO_END};
+const uint16_t PROGMEM combo_mn[] = {KC_M, KC_N, COMBO_END};
+const uint16_t PROGMEM combo_kh[] = {KC_K, KC_H, COMBO_END};
+const uint16_t PROGMEM combo_gt[] = {KC_G, KC_T, COMBO_END};
+const uint16_t PROGMEM combo_bp[] = {KC_B, KC_P, COMBO_END};
+const uint16_t PROGMEM combo_vd[] = {KC_V, KC_D, COMBO_END};
+const uint16_t PROGMEM combo_rs[] = {KC_R, KC_S, COMBO_END};
+const uint16_t PROGMEM combo_ie[] = {KC_I, KC_E, COMBO_END};
+const uint16_t PROGMEM combo_wf[] = {KC_W, KC_F, COMBO_END};
+const uint16_t PROGMEM combo_yu[] = {KC_Y, KC_U, COMBO_END};
 
 combo_t key_combos[] = {
-    COMBO(ctl_combo, ONESHOT_CTL),
+    COMBO(combo_fp, KC_LPRN),
+    COMBO(combo_ul, KC_RPRN),
+    COMBO(combo_st, KC_LCBR),
+    COMBO(combo_en, KC_RCBR),
+    COMBO(combo_cd, KC_LBRC),
+    COMBO(combo_comma_h, KC_RBRC),
+    COMBO(combo_jl, KC_GRAVE),
+    COMBO(combo_mn, KC_QUOTE),
+    COMBO(combo_kh, KC_DQUO),
+    COMBO(combo_gt, KC_SLASH),
+    COMBO(combo_bp, KC_BSLS),
+    COMBO(combo_vd, KC_PIPE),
+    COMBO(combo_rs, KC_AT),
+    COMBO(combo_ie, KC_DLR),
+    COMBO(combo_xc, KC_LABK),
+    COMBO(combo_dot_comma, KC_RABK),
+    COMBO(combo_wf, KC_HASH),
+    COMBO(combo_yu, KC_AMPR),
 };
+// clang-format on
 
 // clang-format off
 #define LAYOUT( \
   L00, L01, L02, L03, L04,  R00, R01, R02, R03, R04, \
   L05, L06, L07, L08, L09,  R05, R06, R07, R08, R09, \
   L10, L11, L12, L13, L14,  R10, R11, R12, R13, R14, \
-            L15, L16, L17,  R15, R16, R17            \
-) LAYOUT_split_3x5_3( \
+                      L15,  R15                      \
+) LAYOUT_split_3x5_1( \
   KC_##L00, KC_##L01, KC_##L02, KC_##L03, KC_##L04,     KC_##R00, KC_##R01, KC_##R02, KC_##R03, KC_##R04, \
   KC_##L05, KC_##L06, KC_##L07, KC_##L08, KC_##L09,     KC_##R05, KC_##R06, KC_##R07, KC_##R08, KC_##R09, \
   KC_##L10, KC_##L11, KC_##L12, KC_##L13, KC_##L14,     KC_##R10, KC_##R11, KC_##R12, KC_##R13, KC_##R14, \
-                      KC_##L15, KC_##L16, KC_##L17,     KC_##R15, KC_##R16, KC_##R17                      \
+                                          KC_##L15,     KC_##R15                                          \
 )
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -70,48 +104,35 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
                Z   ,   X   ,   C   ,   D   ,   V   ,          K   ,   H   , COMMA ,  DOT  , CAPS  ,
         // '---------------------------------------'      '---------------------------------------'
-        //               ,-------+---------+-------.      .--------+----------+-------.
-                           SECON ,  SPACE  , ____  ,          FUN  ,  OSHIFT  , PRIM
-        //               '-------+---------+-------'      '--------+----------+-------'
+        //                                 ,-------.      .--------.
+                                             SPACE ,         PRIM
+        //                                 '-------'      '--------'
     ),
 
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             EXLM  , QUES  , LPRN  , PLUS  , AT    ,        BSLS  , EQUAL , RPRN  , GRAVE , ASTR  ,
+             ESC   , ASTR  , PLUS  , MINUS , PERC  ,        CIRC  , UNDS  , EQUAL , TILD  , QUES  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             PIPE  , SLASH , LCBR  , MINUS , LABK  ,        RABK  , UNDS  , RCBR  , QUOTE , DLR   ,
+             1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             AMPR  , HASH  , LBRC  , TAB   , SCLN  ,        COLN  , ENTER , RBRC  , DQUO  , PERC  ,
+             RALT  , LALT  , OCTL  , TAB   , SCLN  ,        COLN  , ENTER , OSFT  , LGUI  , EXLM  ,
         // '---------------------------------------'      '---------------------------------------'
-        //        ,----------+----------+----------.      .---------+----------+---------.
-                      ____   ,   ____   ,   ____   ,         ____   ,   ____   ,  XXXX
-        //        '----------+----------+----------'      '---------+----------+---------'
+        //                                 ,-------.      .--------.
+                                             SECON ,         XXXX
+        //                                 '-------'      '--------'
     ),
 
     [SECONDARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ESC  , ____  , ____  , MOUSE ,  ____ ,         ____ , ____  , ____  , ____  , ____  ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-               1   ,  2    ,  3    ,  4    ,  5    ,         6    ,  7    ,  8    ,  9    ,  0    ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , RALT  , LALT  , TAB   , ____  ,         ____ , CIRC  , TILD  , ____  , ____  ,
-        // '---------------------------------------'      '---------------------------------------'
-        //        ,----------+----------+----------.      .---------+--------+---------.
-                      XXXX   ,   ____   ,   ____   ,         ____   ,  ____  ,   NAV
-        //        '----------+----------+----------'      '---------+--------+---------'
-    ),
-
-    [NAV] = LAYOUT(
-        // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , UP    , ____  , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
+             ____  , ____  , UP    , MOUSE , FULL  ,        LOCK  , ____  , ____  , ____  , PSCR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , CTL(1), CTL(2), CTL(3), PGDN  ,        ____  , LGUI  , ____  , ____  , ____  ,
+             ____  , ____  , ____  , ____  , PGDN  ,        ____  , ____  , ____  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
-        //        ,----------+----------+----------.      .--------+----------+---------.
-                      ____   ,   ____   ,   ____   ,         ____  ,   ____   ,   ____
-        //        '----------+----------+----------'      '--------+----------+---------'
+        //                                 ,-------.      .--------.
+                                             ____  ,         FUN
+        //                                 '-------'      '--------'
     ),
 
     [MOUSE] = LAYOUT(
@@ -122,22 +143,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               ____ , LSFT  , LCTL  , ____  , WH_D  ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
         // '---------------------------------------'      '---------------------------------------'
-        //        ,----------+----------+----------.      .---------+-------+---------.
-                      ____   ,   ____   ,   ____   ,         ____   ,  ____ ,   ____
-        //        '----------+----------+----------'      '---------+-------+---------'
+        //                                 ,-------.      .--------.
+                                             ____  ,         ____
+        //                                 '-------'      '--------'
     ),
 
     [FUNCTION] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ____ ,  ____ ,  ____ ,  ____ ,  ____ ,        RESET , ____  ,  ____ ,  ____ ,  PSCR ,
+              ____ ,  ____ ,  ____ ,  ____ ,  ____ ,        ____  , ____  ,  ____ ,  ____ , RESET ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               F1   ,  F2   ,  F3   ,  F4   ,  F5   ,         F6   ,  F7   ,  F8   ,  F9   ,  F10  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               F11  ,  F12  ,  ____ ,  ____ ,  ____ ,        ____  , ____  ,  ____ ,  ____ , ____  ,
         // '---------------------------------------'      '---------------------------------------'
-        //        ,----------+----------+----------.      .---------+--------+---------.
-                      ____   ,   ____   ,   XXXX   ,         ____   ,  ____  ,   ____
-        //        '----------+----------+----------'      '---------+--------+---------'
+        //                                 ,-------.      .--------.
+                                             ____  ,         ____
+        //                                 '-------'      '--------'
     ),
 };
 // clang-format on
@@ -209,13 +230,27 @@ void after_oneshot(struct oneshot_state *state, keyrecord_t *record) {
 }
 
 void reset_oneshot(struct oneshot_state *state) {
+  if (state->status == OS_DISABLED || state->status == OS_HOLDING) {
+    return;
+  }
+
   state->status = OS_DISABLED;
   unregister_code(state->modifier);
 }
 
+bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
+  switch (keycode) {
+  case KC_PRIM:
+  case KC_SECON:
+    return true;
+  default:
+    return false;
+  }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
-  case ONESHOT_SHIFT:
+  case ONESHOT_SFT:
     oneshot(&shift_state, record);
     break;
   case ONESHOT_CTL:
@@ -223,8 +258,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     break;
   case KC_PRIM:
   case KC_SECON:
-  case KC_NAV:
   case KC_MOUSE:
+  case KC_FUN:
     break;
   case KC_ESC:
     reset_oneshot(&shift_state);
