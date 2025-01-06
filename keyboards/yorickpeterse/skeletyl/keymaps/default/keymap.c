@@ -62,26 +62,30 @@ const uint16_t PROGMEM combo_yu[] = {KC_Y, KC_U, COMBO_END};
 
 combo_t key_combos[] = {
   // Left hand
-  COMBO(combo_wf, KC_HASH),
-  COMBO(combo_rs, KC_AT),
-  COMBO(combo_xc, KC_LABK),
+  COMBO(combo_wf, KC_BSLS),
+  COMBO(combo_rs, KC_SLASH),
+  COMBO(combo_xc, KC_PIPE),
+
   COMBO(combo_fp, KC_LPRN),
   COMBO(combo_st, KC_LCBR),
   COMBO(combo_cd, KC_LBRC),
-  COMBO(combo_bp, KC_BSLS),
-  COMBO(combo_gt, KC_SLASH),
-  COMBO(combo_vd, KC_PIPE),
+
+  COMBO(combo_bp, KC_AT),
+  COMBO(combo_gt, KC_HASH),
+  COMBO(combo_vd, KC_LABK),
 
   // Right hand
-  COMBO(combo_yu, KC_AMPR),
-  COMBO(combo_ie, KC_DLR),
-  COMBO(combo_dot_comma, KC_RABK),
+  COMBO(combo_yu, KC_GRAVE),
+  COMBO(combo_ie, KC_QUOTE),
+  COMBO(combo_dot_comma, KC_DQUO),
+
   COMBO(combo_ul, KC_RPRN),
   COMBO(combo_en, KC_RCBR),
   COMBO(combo_comma_h, KC_RBRC),
-  COMBO(combo_jl, KC_GRAVE),
-  COMBO(combo_mn, KC_QUOTE),
-  COMBO(combo_kh, KC_DQUO),
+
+  COMBO(combo_jl, KC_AMPR),
+  COMBO(combo_mn, KC_DLR),
+  COMBO(combo_kh, KC_RABK),
 };
 // clang-format on
 
