@@ -5,15 +5,14 @@
 #define KC_____ KC_TRNS
 #define KC_NONE KC_NO
 #define KC_NORM TO(NORMAL)
-#define KC_PRIM LT(PRIMARY, KC_ENTER)
-#define KC_NAV MO(NAV)
+#define KC_PRIM OSL(PRIMARY)
+#define KC_NAV OSL(NAV)
 #define KC_MOUSE TO(MOUSE)
-#define KC_FUN MO(FUNCTION)
+#define KC_FUNC OSL(FUNCTION)
 #define KC_FULL LALT(KC_F11)
 #define KC_LOCK LCTL(LALT(KC_DEL))
 #define KC_CTL(KEY) LCTL(KC_##KEY)
 #define KC_ALT(KEY) LALT(KC_##KEY)
-#define KC_GUI(KEY) LGUI(KC_##KEY)
 #define KC_RESET QK_BOOT
 #define KC_OCTL ONESHOT_CTL
 #define KC_CAPS CW_TOGG
@@ -24,7 +23,7 @@ enum custom_keycodes {
   ONESHOT_CTL,
 };
 
-enum layer { NORMAL, PRIMARY, NAV, RIGHT, FUNCTION, MOUSE };
+enum layer { NORMAL, PRIMARY, NAV, FUNCTION, MOUSE };
 
 enum oneshot_status {
   OS_DISABLED,
@@ -40,16 +39,28 @@ struct oneshot_state {
 };
 
 // clang-format off
-const uint16_t PROGMEM combo_left[] = {KC_S, KC_T, COMBO_END};
-const uint16_t PROGMEM combo_ralt[] = {KC_BSPC, KC_Y, COMBO_END};
+const uint16_t PROGMEM combo_tab[] = {KC_C, KC_D , COMBO_END};
+const uint16_t PROGMEM combo_ctl[] = {KC_X, KC_C, COMBO_END};
+const uint16_t PROGMEM combo_ent[] = {KC_COMMA, KC_H, COMBO_END};
 
 combo_t key_combos[] = {
-  COMBO(combo_left, MO(RIGHT)),
-  COMBO(combo_ralt, KC_RALT),
+  COMBO(combo_ctl, KC_OCTL),
+  COMBO(combo_ent, KC_ENTER),
+  COMBO(combo_tab, KC_TAB),
 };
-// clang-format on
 
-// clang-format off
+// These overrides are used such that I don't need extra keys for the closing
+// brackets.
+const key_override_t override_shift_lpar = ko_make_basic(MOD_MASK_SHIFT, KC_LPRN, KC_RPRN);
+const key_override_t override_shift_lbrc = ko_make_basic(MOD_MASK_SHIFT, KC_LBRC, KC_RBRC);
+const key_override_t override_shift_lcbr = ko_make_basic(MOD_MASK_SHIFT, KC_LCBR, KC_RCBR);
+
+const key_override_t *key_overrides[] = {
+	&override_shift_lpar,
+	&override_shift_lbrc,
+	&override_shift_lcbr,
+};
+
 #define LAYOUT( \
   L00, L01, L02, L03, L04,  R00, R01, R02, R03, R04, \
   L05, L06, L07, L08, L09,  R05, R06, R07, R08, R09, \
@@ -76,29 +87,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         //                                 '-------'      '--------'
     ),
 
-    // ? = OSFT + SLASH
-    // ! = OSFT + 1
-    // @ = OSFT + 2
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ESC   , EQUAL , MINUS , UNDS  , SLASH ,        BSLS  , LABK  , RABK  , PLUS  , ASTR  ,
+             ESC   , SLASH , MINUS , UNDS  , BSLS  ,        LABK  , RABK  , EQUAL , MOUSE , FUNC  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             TILD  , HASH  , OCTL  , TAB   , SCLN  ,        COLN  , OSFT  , QUOTE , DQUO  , GRAVE ,
-        // '---------------------------------------'      '---------------------------------------'
-        //                                 ,-------.      .--------.
-                                              NAV  ,         ____
-        //                                 '-------'      '--------'
-    ),
-
-    [RIGHT] = LAYOUT(
-        // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , ____  , ____  , ____  ,        PIPE  , LPRN  , RPRN  , AMPR  , ____  ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , ____  , ____  , ____  , ____  ,        DLR   , LCBR  , RCBR  , ____  , ____  ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , ____  , ____  , ____  , ____  ,        CIRC  , LBRC  , RBRC  , ____  , ____  ,
+             ____  , LPRN  , LBRC  , LCBR  , SCLN  ,        NAV   , QUOTE , OSFT  , GRAVE , RALT  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              ____  ,         ____
@@ -107,14 +102,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [NAV] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , UP    , MOUSE , ____  ,        ____  , LGUI  , ____  , ____  , ____  ,
+             ____  , ____  , UP    , LGUI  , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , LALT  , ____  , TAB   , PGDN  ,        ____  ,CTL(1) ,CTL(2) ,CTL(3) , ____  ,
+             ____  , ____  , LALT  , TAB   , PGDN  ,        ____  ,CTL(1) ,CTL(2) ,CTL(3) , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
-                                             ____  ,         FUN
+                                             ____  ,         ____
         //                                 '-------'      '--------'
     ),
 
@@ -133,11 +128,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [FUNCTION] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-              ____ ,  ____ ,  ____ ,  ____ , FULL  ,        LOCK  , PSCR  ,  ____ ,  ____ , RESET ,
+              ____ ,  ____ ,  ____ ,  ____ , ____  ,        ____  , PSCR  ,  ____ ,  ____ , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
               F1   ,  F2   ,  F3   ,  F4   ,  F5   ,         F6   ,  F7   ,  F8   ,  F9   ,  F10  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              F11  ,  F12  ,  ____ ,  ____ ,  ____ ,        ____  , ____  ,  ____ ,  ____ , ____  ,
+              F11  ,  F12  ,  ____ ,  ____ ,  ____ ,        ____  , ____  ,  ____ ,  ____ , RESET ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              ____  ,         ____
@@ -224,8 +219,6 @@ void reset_oneshot(struct oneshot_state *state) {
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
   case KC_PRIM:
-  case KC_NAV:
-  case KC_LEFT:
     return true;
   default:
     return false;
@@ -241,10 +234,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     oneshot(&ctl_state, record);
     break;
   case KC_PRIM:
-  case KC_NAV:
   case KC_MOUSE:
-  case KC_FUN:
-  case KC_RIGHT:
     break;
   case KC_ESC:
     reset_oneshot(&shift_state);
