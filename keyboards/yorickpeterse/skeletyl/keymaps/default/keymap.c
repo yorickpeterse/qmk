@@ -42,11 +42,15 @@ struct oneshot_state {
 const uint16_t PROGMEM combo_tab[] = {KC_C, KC_D , COMBO_END};
 const uint16_t PROGMEM combo_ctl[] = {KC_X, KC_C, COMBO_END};
 const uint16_t PROGMEM combo_ent[] = {KC_COMMA, KC_H, COMBO_END};
+const uint16_t PROGMEM combo_nav[] = {KC_DOT, KC_COMMA, COMBO_END};
+const uint16_t PROGMEM combo_fun[] = {KC_Z, KC_X, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(combo_ctl, KC_OCTL),
   COMBO(combo_ent, KC_ENTER),
   COMBO(combo_tab, KC_TAB),
+  COMBO(combo_nav, KC_NAV),
+  COMBO(combo_fun, KC_FUNC),
 };
 
 // These overrides are used such that I don't need extra keys for the closing
@@ -89,11 +93,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ESC   , SLASH , MINUS , UNDS  , BSLS  ,        LABK  , RABK  , EQUAL , MOUSE , FUNC  ,
+             ESC   , SLASH , MINUS , UNDS  , BSLS  ,        LABK  , RABK  , EQUAL , PLUS  , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , LPRN  , LBRC  , LCBR  , SCLN  ,        NAV   , QUOTE , OSFT  , GRAVE , RALT  ,
+             ____  , LPRN  , LBRC  , LCBR  , SCLN  ,        MOUSE , QUOTE , OSFT  , GRAVE , RALT  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              ____  ,         ____
