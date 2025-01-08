@@ -18,6 +18,11 @@
 #define KC_CAPS CW_TOGG
 #define KC_OSFT ONESHOT_SFT
 
+// For some reason using _just_ KC_LGUI on an OSL layer results in it not
+// working as it should, resulting in e.g. Gnome's overview not focusing the
+// search bar. This lets us work around that.
+#define KC_SUPER LGUI(KC_NONE)
+
 enum custom_keycodes {
   ONESHOT_SFT = SAFE_RANGE,
   ONESHOT_CTL,
@@ -109,11 +114,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [NAV] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , UP    , LGUI  , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
+             LALT  , TAB   , UP    , ____  , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , ____  , LALT  , TAB   , PGDN  ,        ____  ,CTL(1) ,CTL(2) ,CTL(3) , ____  ,
+             ____  , CTL(1), CTL(2), CTL(3), PGDN  ,        ____  , SUPER , ____  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              ____  ,         ____
@@ -226,9 +231,20 @@ void reset_oneshot(struct oneshot_state *state) {
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
   case KC_PRIM:
+  case KC_NAV:
     return true;
   default:
     return false;
+  }
+}
+
+uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
+  switch (combo->keys[0]) {
+  case KC_X:
+  case KC_DOT:
+    return 50;
+  default:
+    return COMBO_TERM;
   }
 }
 

@@ -14,6 +14,7 @@
 #define QMK_KEYS_PER_SCAN 4
 #define TAPPING_TERM 200
 
+#define COMBO_TERM_PER_COMBO
 #define COMBO_TERM 35
 
 #define MK_KINETIC_SPEED
