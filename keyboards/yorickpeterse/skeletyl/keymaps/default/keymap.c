@@ -44,6 +44,7 @@ const uint16_t PROGMEM combo_ctl[] = {KC_X, KC_C, COMBO_END};
 const uint16_t PROGMEM combo_ent[] = {KC_COMMA, KC_H, COMBO_END};
 const uint16_t PROGMEM combo_nav[] = {KC_DOT, KC_COMMA, COMBO_END};
 const uint16_t PROGMEM combo_fun[] = {KC_Z, KC_X, COMBO_END};
+const uint16_t PROGMEM combo_mouse[] = {KC_F, KC_P, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(combo_ctl, KC_OCTL),
@@ -51,6 +52,7 @@ combo_t key_combos[] = {
   COMBO(combo_tab, KC_TAB),
   COMBO(combo_nav, KC_NAV),
   COMBO(combo_fun, KC_FUNC),
+  COMBO(combo_mouse, KC_MOUSE),
 };
 
 // These overrides are used such that I don't need extra keys for the closing
@@ -58,6 +60,7 @@ combo_t key_combos[] = {
 const key_override_t override_shift_lpar = ko_make_basic(MOD_MASK_SHIFT, KC_LPRN, KC_RPRN);
 const key_override_t override_shift_lbrc = ko_make_basic(MOD_MASK_SHIFT, KC_LBRC, KC_RBRC);
 const key_override_t override_shift_lcbr = ko_make_basic(MOD_MASK_SHIFT, KC_LCBR, KC_RCBR);
+const key_override_t override_shift_bspc = ko_make_basic(MOD_MASK_SHIFT, KC_BSPC, KC_DELETE);
 
 const key_override_t *key_overrides[] = {
 	&override_shift_lpar,
@@ -97,7 +100,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , LPRN  , LBRC  , LCBR  , SCLN  ,        MOUSE , QUOTE , OSFT  , GRAVE , RALT  ,
+             DLR   , LPRN  , LBRC  , LCBR  , SCLN  ,        HASH  , QUOTE , OSFT  , GRAVE , RALT  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              ____  ,         ____
