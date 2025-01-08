@@ -9,6 +9,7 @@
 #define KC_NAV OSL(NAV)
 #define KC_MOUSE TO(MOUSE)
 #define KC_FUNC OSL(FUNCTION)
+#define KC_NUMS NUMWORD
 #define KC_FULL LALT(KC_F11)
 #define KC_LOCK LCTL(LALT(KC_DEL))
 #define KC_CTL(KEY) LCTL(KC_##KEY)
@@ -26,9 +27,10 @@
 enum custom_keycodes {
   ONESHOT_SFT = SAFE_RANGE,
   ONESHOT_CTL,
+  NUMWORD,
 };
 
-enum layer { NORMAL, PRIMARY, NAV, FUNCTION, MOUSE };
+enum layer { NORMAL, PRIMARY, NUMBERS, NAV, FUNCTION, MOUSE };
 
 enum oneshot_status {
   OS_DISABLED,
@@ -60,17 +62,14 @@ combo_t key_combos[] = {
   COMBO(combo_mouse, KC_MOUSE),
 };
 
-// These overrides are used such that I don't need extra keys for the closing
+// These overrides are used such that I don't need extra keys for the various
 // brackets.
-const key_override_t override_shift_lpar = ko_make_basic(MOD_MASK_SHIFT, KC_LPRN, KC_RPRN);
-const key_override_t override_shift_lbrc = ko_make_basic(MOD_MASK_SHIFT, KC_LBRC, KC_RBRC);
-const key_override_t override_shift_lcbr = ko_make_basic(MOD_MASK_SHIFT, KC_LCBR, KC_RCBR);
 const key_override_t override_shift_bspc = ko_make_basic(MOD_MASK_SHIFT, KC_BSPC, KC_DELETE);
+const key_override_t override_shift_ques = ko_make_basic(MOD_MASK_SHIFT, KC_QUES, KC_EXLM);
 
 const key_override_t *key_overrides[] = {
-	&override_shift_lpar,
-	&override_shift_lbrc,
-	&override_shift_lcbr,
+	&override_shift_bspc,
+	&override_shift_ques,
 };
 
 #define LAYOUT( \
@@ -101,11 +100,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ESC   , SLASH , MINUS , UNDS  , BSLS  ,        LABK  , RABK  , EQUAL , PLUS  , ASTR  ,
+             ESC   , PLUS  , MINUS , LPRN  , AT    ,        PERC  , RPRN  , UNDS  , GRAVE , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
+             QUES  , SLASH , HASH  , LCBR  , LABK  ,        RABK  , RCBR  , EQUAL , QUOTE , DLR   ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             DLR   , LPRN  , LCBR  , LBRC  , SCLN  ,        COLN  , QUOTE , OSFT  , GRAVE , RALT  ,
+             AMPR  , BSLS  , NUMS  , LBRC  , SCLN  ,        COLN  , RBRC  , OSFT  , DQUO  , CIRC  ,
+        // '---------------------------------------'      '---------------------------------------'
+        //                                 ,-------.      .--------.
+                                             ____  ,         ____
+        //                                 '-------'      '--------'
+    ),
+
+    [NUMBERS] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+              ESC  ,  ____ ,  ____ ,  ____ ,  ____ ,        ____  ,  ____ ,  UNDS ,  ____ ,  BSPC ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              1    ,  2    ,  3    ,  4    ,  5    ,        6     ,  7    ,  8    ,  9    ,  0    ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              ____ ,  ____ ,  ____ ,  ____ ,  ____ ,        ____  ,  ____ ,  ____ ,  DOT  ,  ____ ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              ____  ,         ____
@@ -162,6 +174,8 @@ struct oneshot_state ctl_state = {
     .status = OS_DISABLED,
     .modifier = KC_LCTL,
 };
+
+bool numword = false;
 
 void oneshot(struct oneshot_state *state, keyrecord_t *record) {
   if (record->event.pressed) {
@@ -249,6 +263,28 @@ uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  if (record->event.pressed && numword) {
+    switch (keycode) {
+    case KC_1 ... KC_0:
+    case KC_BSPC:
+    case KC_UNDS:
+    case KC_DOT:
+      break;
+    case KC_ESC:
+      numword = false;
+      layer_off(NUMBERS);
+      return false;
+    default:
+      numword = false;
+      layer_off(NUMBERS);
+      return true;
+    }
+  } else if (record->event.pressed && keycode == NUMWORD) {
+    layer_on(NUMBERS);
+    numword = true;
+    return true;
+  }
+
   switch (keycode) {
   case ONESHOT_SFT:
     oneshot(&shift_state, record);
