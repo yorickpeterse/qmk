@@ -100,9 +100,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ESC   , PLUS  , MINUS , LPRN  , AT    ,        PERC  , RPRN  , UNDS  , GRAVE , ASTR  ,
+             ESC   , PLUS  , HASH  , LPRN  , AT    ,        PERC  , RPRN  , EQUAL , GRAVE , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             QUES  , SLASH , HASH  , LCBR  , LABK  ,        RABK  , RCBR  , EQUAL , QUOTE , DLR   ,
+             QUES  , SLASH , MINUS , LCBR  , LABK  ,        RABK  , RCBR  , UNDS  , QUOTE , DLR   ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              AMPR  , BSLS  , NUMS  , LBRC  , SCLN  ,        COLN  , RBRC  , OSFT  , DQUO  , CIRC  ,
         // '---------------------------------------'      '---------------------------------------'
