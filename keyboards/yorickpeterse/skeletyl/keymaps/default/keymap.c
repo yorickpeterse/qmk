@@ -282,7 +282,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   } else if (record->event.pressed && keycode == NUMWORD) {
     layer_on(NUMBERS);
     numword = true;
-    return true;
+    return false;
   }
 
   switch (keycode) {
