@@ -46,20 +46,20 @@ struct oneshot_state {
 };
 
 // clang-format off
-const uint16_t PROGMEM combo_tab[] = {KC_C, KC_D , COMBO_END};
 const uint16_t PROGMEM combo_ctl[] = {KC_X, KC_C, COMBO_END};
 const uint16_t PROGMEM combo_ent[] = {KC_COMMA, KC_H, COMBO_END};
 const uint16_t PROGMEM combo_nav[] = {KC_DOT, KC_COMMA, COMBO_END};
 const uint16_t PROGMEM combo_fun[] = {KC_Z, KC_X, COMBO_END};
 const uint16_t PROGMEM combo_mouse[] = {KC_F, KC_P, COMBO_END};
+const uint16_t PROGMEM combo_ralt[] = {KC_BSPC, KC_Y, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(combo_ctl, KC_OCTL),
   COMBO(combo_ent, KC_ENTER),
-  COMBO(combo_tab, KC_TAB),
   COMBO(combo_nav, KC_NAV),
   COMBO(combo_fun, KC_FUNC),
   COMBO(combo_mouse, KC_MOUSE),
+  COMBO(combo_ralt, KC_RALT),
 };
 
 // These overrides are used such that I don't need extra keys for the various
@@ -100,14 +100,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ESC   , PLUS  , HASH  , LPRN  , AT    ,        PERC  , RPRN  , EQUAL , GRAVE , ASTR  ,
+             ESC   , PLUS  , LPRN  , HASH  , AT    ,        PERC  , EQUAL , RPRN  , GRAVE , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             QUES  , SLASH , MINUS , LCBR  , LABK  ,        RABK  , RCBR  , UNDS  , QUOTE , DLR   ,
+             QUES  , SLASH , LCBR  , NUMS  , LABK  ,        RABK  , TAB   , RCBR  , QUOTE , DLR   ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             AMPR  , BSLS  , NUMS  , LBRC  , SCLN  ,        COLN  , RBRC  , OSFT  , DQUO  , CIRC  ,
+             AMPR  , BSLS  , LBRC  , MINUS , SCLN  ,        COLN  , UNDS  , RBRC  , DQUO  , CIRC  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
-                                             ____  ,         ____
+                                             OSFT  ,         ____
         //                                 '-------'      '--------'
     ),
 
