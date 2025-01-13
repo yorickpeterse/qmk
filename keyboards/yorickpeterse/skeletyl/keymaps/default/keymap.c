@@ -238,6 +238,7 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
 uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
   switch (combo->keys[0]) {
   case KC_X:
+  case KC_F:
   case KC_DOT:
     return 50;
   default:
