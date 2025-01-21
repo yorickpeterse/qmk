@@ -49,14 +49,12 @@ const uint16_t PROGMEM combo_ent[] = {KC_COMMA, KC_H, COMBO_END};
 const uint16_t PROGMEM combo_fun[] = {KC_Z, KC_X, COMBO_END};
 const uint16_t PROGMEM combo_tab[] = {KC_C, KC_D, COMBO_END};
 const uint16_t PROGMEM combo_mouse[] = {KC_F, KC_P, COMBO_END};
-const uint16_t PROGMEM combo_ralt[] = {KC_BSPC, KC_Y, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(combo_ctl, KC_OCTL),
   COMBO(combo_ent, KC_ENTER),
   COMBO(combo_fun, KC_FUNC),
   COMBO(combo_mouse, KC_MOUSE),
-  COMBO(combo_ralt, KC_RALT),
   COMBO(combo_tab, KC_TAB),
 };
 
@@ -96,7 +94,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ESC  , SLASH  , EQUAL , MINUS , EXLM  ,        ____  , UNDS  , QUOTE , BSLS  , GRAVE ,
+             ESC  , SLASH  , EQUAL , MINUS , EXLM  ,        RALT  , UNDS  , QUOTE , BSLS  , GRAVE ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
