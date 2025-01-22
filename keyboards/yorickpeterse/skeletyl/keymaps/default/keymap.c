@@ -48,13 +48,11 @@ const uint16_t PROGMEM combo_ctl[] = {KC_X, KC_C, COMBO_END};
 const uint16_t PROGMEM combo_ent[] = {KC_COMMA, KC_H, COMBO_END};
 const uint16_t PROGMEM combo_fun[] = {KC_Z, KC_X, COMBO_END};
 const uint16_t PROGMEM combo_tab[] = {KC_C, KC_D, COMBO_END};
-const uint16_t PROGMEM combo_mouse[] = {KC_F, KC_P, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(combo_ctl, KC_OCTL),
   COMBO(combo_ent, KC_ENTER),
   COMBO(combo_fun, KC_FUNC),
-  COMBO(combo_mouse, KC_MOUSE),
   COMBO(combo_tab, KC_TAB),
 };
 
@@ -107,7 +105,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [NAV] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             LALT  , TAB   , UP    , ____  , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
+             LALT  , TAB   , UP    , MOUSE , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -234,7 +232,6 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
 uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
   switch (combo->keys[0]) {
   case KC_X:
-  case KC_F:
     return 50;
   default:
     return COMBO_TERM;
