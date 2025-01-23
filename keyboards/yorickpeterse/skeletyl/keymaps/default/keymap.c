@@ -5,7 +5,8 @@
 #define KC_____ KC_TRNS
 #define KC_NONE KC_NO
 #define KC_NORM TO(NORMAL)
-#define KC_PRIM OSL(PRIMARY)
+#define KC_PRIM RIGHT_THUMB
+#define KC_SECON LT(SECONDARY, KC_ESC)
 #define KC_NAV OSL(NAV)
 #define KC_MOUSE TO(MOUSE)
 #define KC_FUNC OSL(FUNCTION)
@@ -16,7 +17,6 @@
 #define KC_RESET QK_BOOT
 #define KC_OCTL ONESHOT_CTL
 #define KC_CAPS CW_TOGG
-#define KC_OSFT ONESHOT_SFT
 
 // For some reason using _just_ KC_LGUI on an OSL layer results in it not
 // working as it should, resulting in e.g. Gnome's overview not focusing the
@@ -24,11 +24,11 @@
 #define KC_SUPER LGUI(KC_NONE)
 
 enum custom_keycodes {
-  ONESHOT_SFT = SAFE_RANGE,
+  RIGHT_THUMB = SAFE_RANGE,
   ONESHOT_CTL,
 };
 
-enum layer { NORMAL, PRIMARY, NAV, FUNCTION, MOUSE };
+enum layer { NORMAL, PRIMARY, SECONDARY, NAV, FUNCTION, MOUSE };
 
 enum oneshot_status {
   OS_DISABLED,
@@ -41,6 +41,7 @@ enum oneshot_status {
 struct oneshot_state {
   enum oneshot_status status;
   uint16_t modifier;
+  int layer;
 };
 
 // clang-format off
@@ -59,9 +60,11 @@ combo_t key_combos[] = {
 // These overrides are used such that I don't need extra keys for the various
 // brackets.
 const key_override_t override_shift_bspc = ko_make_basic(MOD_MASK_SHIFT, KC_BSPC, KC_DELETE);
+const key_override_t override_shift_space = ko_make_basic(MOD_MASK_SHIFT, KC_SPACE, KC_ESCAPE);
 
 const key_override_t *key_overrides[] = {
 	&override_shift_bspc,
+	&override_shift_space,
 };
 
 #define LAYOUT( \
@@ -92,24 +95,37 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ESC  , SLASH  , EQUAL , MINUS , EXLM  ,        RALT  , UNDS  , QUOTE , BSLS  , GRAVE ,
+             EXLM  , QUES  , LPRN  , PLUS  , AT    ,        BSLS  , EQUAL , RPRN  , GRAVE , TILD  ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+             PIPE  , SLASH , LCBR  , MINUS , LABK  ,        RABK  , UNDS  , RCBR  , QUOTE , DLR   ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+             AMPR  , HASH  , LBRC  , ASTR  , SCLN  ,        COLN  , CIRC  , RBRC  , DQUO  , PERC  ,
+        // '---------------------------------------'      '---------------------------------------'
+        //                                 ,-------.      .--------.
+                                             SECON ,         ____
+        //                                 '-------'      '--------'
+    ),
+
+    [SECONDARY] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+             ____  , ____  , ____  , MOUSE , ____  ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             LABK  , LPRN  , LCBR  , LBRC  , SCLN  ,        COLN  , RBRC  , RCBR  , RPRN  , RABK  ,
+             ____  , CTL(1), CTL(2), CTL(3), ____  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
-                                             OSFT  ,         NAV
+                                             ____  ,         NAV
         //                                 '-------'      '--------'
     ),
 
     [NAV] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             LALT  , TAB   , UP    , MOUSE , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
+             LALT  , TAB   , UP    , ____  , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
+             ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  , ____  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , CTL(1), CTL(2), CTL(3), PGDN  ,        ____  , SUPER , ____  , ____  , ____  ,
+             ____  , ____  , ____  , ____  , PGDN  ,        ____  , SUPER , ____  , ____  , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              ____  ,         ____
@@ -147,32 +163,56 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 struct oneshot_state shift_state = {
     .status = OS_DISABLED,
     .modifier = KC_LSFT,
+    .layer = PRIMARY,
 };
 
 struct oneshot_state ctl_state = {
     .status = OS_DISABLED,
     .modifier = KC_LCTL,
+    .layer = -1,
 };
+
+bool disable_primary_after_caps_word = false;
 
 void oneshot(struct oneshot_state *state, keyrecord_t *record) {
   if (record->event.pressed) {
     state->status = OS_HOLDING;
-    register_code(state->modifier);
+
+    if (state->layer == -1) {
+      register_code(state->modifier);
+    } else {
+      layer_on(state->layer);
+    }
   } else {
     switch (state->status) {
     // Nothing pressed after the key down, so schedule the modifier for the
     // next key.
     case OS_HOLDING:
       state->status = OS_RELEASED;
+
+      if (state->layer >= -1) {
+        register_code(state->modifier);
+      }
+
       break;
     // Another key was pressed, so we treat the key as a normal modifier you
     // need to hold down.
     case OS_OTHER_KEY_PRESSED:
       state->status = OS_DISABLED;
-      unregister_code(state->modifier);
+
+      if (state->layer == -1) {
+        unregister_code(state->modifier);
+      }
+
       break;
     default:
       break;
+    }
+
+    // If a layer is used on hold, we should always disable it when releasing
+    // the button.
+    if (state->layer >= 0) {
+      layer_off(state->layer);
     }
   }
 }
@@ -210,18 +250,9 @@ void after_oneshot(struct oneshot_state *state, keyrecord_t *record) {
   }
 }
 
-void reset_oneshot(struct oneshot_state *state) {
-  if (state->status == OS_DISABLED || state->status == OS_HOLDING) {
-    return;
-  }
-
-  state->status = OS_DISABLED;
-  unregister_code(state->modifier);
-}
-
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
-  case KC_PRIM:
+  case KC_SECON:
   case KC_NAV:
     return true;
   default:
@@ -240,18 +271,37 @@ uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
-  case ONESHOT_SFT:
+  case RIGHT_THUMB:
+    // Enable the nav layer after a tap followed by a hold.
+    if (record->event.pressed && shift_state.status == OS_RELEASED) {
+      shift_state.status = OS_DISABLED;
+      unregister_code(shift_state.modifier);
+      layer_on(NAV);
+      return false;
+    } else if (!record->event.pressed && layer_state_is(NAV)) {
+      layer_off(NAV);
+      return false;
+    }
+
+    // This ensures that enabling the primary layer while caps word is enabled
+    // doesn't trigger an unregister of the shift key, disabling caps word in
+    // the process.
+    if (record->event.pressed && is_caps_word_on()) {
+      layer_on(shift_state.layer);
+      disable_primary_after_caps_word = true;
+      return false;
+    } else if (!record->event.pressed && disable_primary_after_caps_word) {
+      layer_off(shift_state.layer);
+      disable_primary_after_caps_word = false;
+      return false;
+    }
+
     oneshot(&shift_state, record);
     break;
   case ONESHOT_CTL:
     oneshot(&ctl_state, record);
     break;
-  case KC_PRIM:
-  case KC_MOUSE:
-    break;
-  case KC_ESC:
-    reset_oneshot(&shift_state);
-    reset_oneshot(&ctl_state);
+  case KC_FUNC:
     break;
   default:
     after_oneshot(&shift_state, record);
