@@ -47,13 +47,11 @@ struct oneshot_state {
 // clang-format off
 const uint16_t PROGMEM combo_ctl[] = {KC_X, KC_C, COMBO_END};
 const uint16_t PROGMEM combo_ent[] = {KC_COMMA, KC_H, COMBO_END};
-const uint16_t PROGMEM combo_fun[] = {KC_Z, KC_X, COMBO_END};
 const uint16_t PROGMEM combo_tab[] = {KC_C, KC_D, COMBO_END};
 
 combo_t key_combos[] = {
   COMBO(combo_ctl, KC_OCTL),
   COMBO(combo_ent, KC_ENTER),
-  COMBO(combo_fun, KC_FUNC),
   COMBO(combo_tab, KC_TAB),
 };
 
@@ -115,13 +113,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
              ____  , CTL(1), CTL(2), CTL(3), ____  ,        ____  , ____  , COMMA , DOT   , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
-                                             ____  ,         NAV
+                                             ____  ,         ____
         //                                 '-------'      '--------'
     ),
 
     [NAV] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             LALT  , TAB   , UP    , ____  , FULL  ,        LOCK  , ____  , ____  , ____  , ____  ,
+             LALT  , TAB   , UP    , ____  , FULL  ,        LOCK  , FUNC  , ____  , ____  , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
