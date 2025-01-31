@@ -286,9 +286,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     // the process.
     if (record->event.pressed && is_caps_word_on()) {
       layer_on(shift_state.layer);
+      shift_state.status = OS_HOLDING;
       disable_primary_after_caps_word = true;
       return false;
     } else if (!record->event.pressed && disable_primary_after_caps_word) {
+      // Allow disabling of caps word by tapping the right thumb.
+      if (shift_state.status == OS_HOLDING) {
+        caps_word_off();
+      }
+
+      shift_state.status = OS_DISABLED;
       layer_off(shift_state.layer);
       disable_primary_after_caps_word = false;
       return false;
