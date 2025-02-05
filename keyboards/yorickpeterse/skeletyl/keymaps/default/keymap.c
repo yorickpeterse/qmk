@@ -6,7 +6,7 @@
 #define KC_NONE KC_NO
 #define KC_NORM TO(NORMAL)
 #define KC_PRIM RIGHT_THUMB
-#define KC_SECON LT(SECONDARY, KC_ESC)
+#define KC_SECON MO(SECONDARY)
 #define KC_NAV OSL(NAV)
 #define KC_MOUSE TO(MOUSE)
 #define KC_FUNC OSL(FUNCTION)
@@ -17,6 +17,7 @@
 #define KC_RESET QK_BOOT
 #define KC_OCTL ONESHOT_CTL
 #define KC_CAPS CW_TOGG
+#define KC_STAB LSFT(KC_TAB)
 
 // For some reason using _just_ KC_LGUI on an OSL layer results in it not
 // working as it should, resulting in e.g. Gnome's overview not focusing the
@@ -44,120 +45,6 @@ struct oneshot_state {
   int layer;
 };
 
-// clang-format off
-const uint16_t PROGMEM combo_ctl[] = {KC_X, KC_C, COMBO_END};
-const uint16_t PROGMEM combo_ent[] = {KC_COMMA, KC_H, COMBO_END};
-const uint16_t PROGMEM combo_tab[] = {KC_C, KC_D, COMBO_END};
-
-combo_t key_combos[] = {
-  COMBO(combo_ctl, KC_OCTL),
-  COMBO(combo_ent, KC_ENTER),
-  COMBO(combo_tab, KC_TAB),
-};
-
-// These overrides are used such that I don't need extra keys for the various
-// brackets.
-const key_override_t override_shift_bspc = ko_make_basic(MOD_MASK_SHIFT, KC_BSPC, KC_DELETE);
-const key_override_t override_shift_space = ko_make_basic(MOD_MASK_SHIFT, KC_SPACE, KC_ESCAPE);
-
-const key_override_t *key_overrides[] = {
-	&override_shift_bspc,
-	&override_shift_space,
-};
-
-#define LAYOUT( \
-  L00, L01, L02, L03, L04,  R00, R01, R02, R03, R04, \
-  L05, L06, L07, L08, L09,  R05, R06, R07, R08, R09, \
-  L10, L11, L12, L13, L14,  R10, R11, R12, R13, R14, \
-                      L15,  R15                      \
-) LAYOUT_split_3x5_1( \
-  KC_##L00, KC_##L01, KC_##L02, KC_##L03, KC_##L04,     KC_##R00, KC_##R01, KC_##R02, KC_##R03, KC_##R04, \
-  KC_##L05, KC_##L06, KC_##L07, KC_##L08, KC_##L09,     KC_##R05, KC_##R06, KC_##R07, KC_##R08, KC_##R09, \
-  KC_##L10, KC_##L11, KC_##L12, KC_##L13, KC_##L14,     KC_##R10, KC_##R11, KC_##R12, KC_##R13, KC_##R14, \
-                                          KC_##L15,     KC_##R15                                          \
-)
-
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [NORMAL] = LAYOUT(
-        // ,---------------------------------------.      ,---------------------------------------.
-               Q   ,   W   ,   F   ,   P   ,   B   ,          J   ,   L   ,   U   ,   Y   , BSPC  ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-               A   ,   R   ,   S   ,   T   ,   G   ,          M   ,   N   ,   E   ,   I   ,   O   ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-               Z   ,   X   ,   C   ,   D   ,   V   ,          K   ,   H   , COMMA ,  DOT  , CAPS  ,
-        // '---------------------------------------'      '---------------------------------------'
-        //                                 ,-------.      .--------.
-                                             SPACE ,         PRIM
-        //                                 '-------'      '--------'
-    ),
-
-    [PRIMARY] = LAYOUT(
-        // ,---------------------------------------.      ,---------------------------------------.
-             EXLM  , QUES  , LPRN  , PLUS  , AT    ,        BSLS  , EQUAL , RPRN  , GRAVE , TILD  ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             PIPE  , SLASH , LCBR  , MINUS , LABK  ,        RABK  , UNDS  , RCBR  , QUOTE , DLR   ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             AMPR  , HASH  , LBRC  , ASTR  , SCLN  ,        COLN  , CIRC  , RBRC  , DQUO  , PERC  ,
-        // '---------------------------------------'      '---------------------------------------'
-        //                                 ,-------.      .--------.
-                                             SECON ,         ____
-        //                                 '-------'      '--------'
-    ),
-
-    [SECONDARY] = LAYOUT(
-        // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , ____  , MOUSE , ____  ,        ____  , ____  , ____  , ____  , ____  ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , CTL(1), CTL(2), CTL(3), ____  ,        ____  , ____  , COMMA , DOT   , ____  ,
-        // '---------------------------------------'      '---------------------------------------'
-        //                                 ,-------.      .--------.
-                                             ____  ,         ____
-        //                                 '-------'      '--------'
-    ),
-
-    [NAV] = LAYOUT(
-        // ,---------------------------------------.      ,---------------------------------------.
-             LALT  , TAB   , UP    , ____  , FULL  ,        LOCK  , FUNC  , ____  , ____  , ____  ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , ____  , ____  , ____  , PGDN  ,        ____  , SUPER , ____  , ____  , ____  ,
-        // '---------------------------------------'      '---------------------------------------'
-        //                                 ,-------.      .--------.
-                                             ____  ,         ____
-        //                                 '-------'      '--------'
-    ),
-
-    [MOUSE] = LAYOUT(
-        // ,---------------------------------------.      ,---------------------------------------.
-              ____ , CTL(C), CTL(V), NORM  ,  ____ ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ , BTN3  , BTN2  , BTN1  , WH_U  ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              ____ , LSFT  , LCTL  , ____  , WH_D  ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
-        // '---------------------------------------'      '---------------------------------------'
-        //                                 ,-------.      .--------.
-                                             ____  ,         ____
-        //                                 '-------'      '--------'
-    ),
-
-    [FUNCTION] = LAYOUT(
-        // ,---------------------------------------.      ,---------------------------------------.
-              ____ ,  ____ ,  ____ ,  ____ , ____  ,        ____  , PSCR  ,  ____ ,  ____ , ____  ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              F1   ,  F2   ,  F3   ,  F4   ,  F5   ,         F6   ,  F7   ,  F8   ,  F9   ,  F10  ,
-        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-              F11  ,  F12  ,  ____ ,  ____ ,  ____ ,        ____  , ____  ,  ____ ,  ____ , RESET ,
-        // '---------------------------------------'      '---------------------------------------'
-        //                                 ,-------.      .--------.
-                                             ____  ,         ____
-        //                                 '-------'      '--------'
-    ),
-};
-// clang-format on
-
 struct oneshot_state shift_state = {
     .status = OS_DISABLED,
     .modifier = KC_LSFT,
@@ -172,8 +59,8 @@ struct oneshot_state ctl_state = {
 
 bool disable_primary_after_caps_word = false;
 
-void oneshot(struct oneshot_state *state, keyrecord_t *record) {
-  if (record->event.pressed) {
+void oneshot(struct oneshot_state *state, bool pressed) {
+  if (pressed) {
     state->status = OS_HOLDING;
 
     if (state->layer == -1) {
@@ -248,6 +135,153 @@ void after_oneshot(struct oneshot_state *state, keyrecord_t *record) {
   }
 }
 
+bool shift_comma_action(bool pressed, void *state) {
+  oneshot(&ctl_state, pressed);
+  return false;
+}
+
+bool shift_space_action(bool pressed, void *state) {
+  if (pressed) {
+    layer_on(NAV);
+  } else {
+    layer_off(NAV);
+  }
+
+  return false;
+}
+
+const key_override_t override_shift_bspc =
+    ko_make_basic(MOD_MASK_SHIFT, KC_BSPC, KC_DELETE);
+const key_override_t override_shift_dot =
+    ko_make_basic(MOD_MASK_SHIFT, KC_DOT, KC_RALT);
+
+const key_override_t override_shift_space = {
+    .trigger_mods = MOD_BIT(KC_LSFT),
+    .layers = ~0,
+    .suppressed_mods = MOD_BIT(KC_LSFT),
+    .options = ko_option_no_unregister_on_other_key_down,
+    .negative_mod_mask = 0,
+    .custom_action = shift_space_action,
+    .context = NULL,
+    .trigger = KC_SPACE,
+    .replacement = KC_NO,
+    .enabled = NULL,
+};
+
+const key_override_t override_shift_comma = {
+    .trigger_mods = MOD_BIT(KC_LSFT),
+    .layers = ~0,
+    .suppressed_mods = MOD_BIT(KC_LSFT),
+    .options = ko_options_default,
+    .negative_mod_mask = 0,
+    .custom_action = shift_comma_action,
+    .context = NULL,
+    .trigger = KC_COMMA,
+    .replacement = KC_NO,
+    .enabled = NULL,
+};
+
+const key_override_t *key_overrides[] = {
+    &override_shift_bspc,
+    &override_shift_space,
+    &override_shift_comma,
+    &override_shift_dot,
+};
+
+// clang-format off
+#define LAYOUT( \
+  L00, L01, L02, L03, L04,  R00, R01, R02, R03, R04, \
+  L05, L06, L07, L08, L09,  R05, R06, R07, R08, R09, \
+  L10, L11, L12, L13, L14,  R10, R11, R12, R13, R14, \
+                      L15,  R15                      \
+) LAYOUT_split_3x5_1( \
+  KC_##L00, KC_##L01, KC_##L02, KC_##L03, KC_##L04,     KC_##R00, KC_##R01, KC_##R02, KC_##R03, KC_##R04, \
+  KC_##L05, KC_##L06, KC_##L07, KC_##L08, KC_##L09,     KC_##R05, KC_##R06, KC_##R07, KC_##R08, KC_##R09, \
+  KC_##L10, KC_##L11, KC_##L12, KC_##L13, KC_##L14,     KC_##R10, KC_##R11, KC_##R12, KC_##R13, KC_##R14, \
+                                          KC_##L15,     KC_##R15                                          \
+)
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+    [NORMAL] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+               Q   ,   W   ,   F   ,   P   ,   B   ,          J   ,   L   ,   U   ,   Y   , BSPC  ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+               A   ,   R   ,   S   ,   T   ,   G   ,          M   ,   N   ,   E   ,   I   ,   O   ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+               Z   ,   X   ,   C   ,   D   ,   V   ,          K   ,   H   , COMMA ,  DOT  , CAPS  ,
+        // '---------------------------------------'      '---------------------------------------'
+        //                                 ,-------.      .--------.
+                                             SPACE ,         PRIM
+        //                                 '-------'      '--------'
+    ),
+
+    [PRIMARY] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+             ESC   , QUES  , LPRN  , PLUS  , AT    ,        BSLS  , EQUAL , RPRN  , GRAVE , EXLM  ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+             PIPE  , SLASH , LCBR  , MINUS , LABK  ,        RABK  , UNDS  , RCBR  , QUOTE , DLR   ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+             AMPR  , HASH  , LBRC  , ASTR  , SCLN  ,        COLN  , ENT   , RBRC  , DQUO  , PERC  ,
+        // '---------------------------------------'      '---------------------------------------'
+        //                                 ,-------.      .--------.
+                                             SECON ,         ____
+        //                                 '-------'      '--------'
+    ),
+
+    [SECONDARY] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+             ____  , ____  , ____  , MOUSE , ____  ,        ____  , ____  , ____  , ____  , TILD  ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+             1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+             ____  , LALT  , STAB  , TAB   , ____  ,        ____  , CIRC  , COMMA , DOT   , ____  ,
+        // '---------------------------------------'      '---------------------------------------'
+        //                                 ,-------.      .--------.
+                                             ____  ,         ____
+        //                                 '-------'      '--------'
+    ),
+
+    [NAV] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+             ____  , ____  , UP    , ____  , FULL  ,        LOCK  , FUNC  , ____  , ____  , ____  ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+             ____  , LEFT  , DOWN  , RIGHT , PGUP  ,        ____  ,CTL(F1),CTL(F2),CTL(F3),CTL(F4),
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+             ____  , CTL(1), CTL(2), CTL(3), PGDN  ,        ____  , SUPER , ____  , ____  , ____  ,
+        // '---------------------------------------'      '---------------------------------------'
+        //                                 ,-------.      .--------.
+                                             ____  ,         ____
+        //                                 '-------'      '--------'
+    ),
+
+    [MOUSE] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+              ____ , CTL(C), CTL(V), NORM  ,  ____ ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              ____ , BTN3  , BTN2  , BTN1  , WH_U  ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              ____ , LSFT  , LCTL  , ____  , WH_D  ,         ____ ,  ____ ,  ____ ,  ____ ,  ____ ,
+        // '---------------------------------------'      '---------------------------------------'
+        //                                 ,-------.      .--------.
+                                             ____  ,         ____
+        //                                 '-------'      '--------'
+    ),
+
+    [FUNCTION] = LAYOUT(
+        // ,---------------------------------------.      ,---------------------------------------.
+              ____ ,  ____ ,  ____ ,  ____ , ____  ,        ____  , PSCR  ,  ____ ,  ____ , ____  ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              F1   ,  F2   ,  F3   ,  F4   ,  F5   ,         F6   ,  F7   ,  F8   ,  F9   ,  F10  ,
+        // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
+              F11  ,  F12  ,  ____ ,  ____ ,  ____ ,        ____  , ____  ,  ____ ,  ____ , RESET ,
+        // '---------------------------------------'      '---------------------------------------'
+        //                                 ,-------.      .--------.
+                                             ____  ,         ____
+        //                                 '-------'      '--------'
+    ),
+};
+// clang-format on
+
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
   case KC_SECON:
@@ -258,29 +292,9 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
   }
 }
 
-uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
-  switch (combo->keys[0]) {
-  case KC_X:
-    return 50;
-  default:
-    return COMBO_TERM;
-  }
-}
-
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
   case RIGHT_THUMB:
-    // Enable the nav layer after a tap followed by a hold.
-    if (record->event.pressed && shift_state.status == OS_RELEASED) {
-      shift_state.status = OS_DISABLED;
-      unregister_code(shift_state.modifier);
-      layer_on(NAV);
-      return false;
-    } else if (!record->event.pressed && layer_state_is(NAV)) {
-      layer_off(NAV);
-      return false;
-    }
-
     // This ensures that enabling the primary layer while caps word is enabled
     // doesn't trigger an unregister of the shift key, disabling caps word in
     // the process.
@@ -301,10 +315,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
     }
 
-    oneshot(&shift_state, record);
+    oneshot(&shift_state, record->event.pressed);
     break;
   case ONESHOT_CTL:
-    oneshot(&ctl_state, record);
+    oneshot(&ctl_state, record->event.pressed);
     break;
   case KC_FUNC:
     break;
