@@ -60,7 +60,7 @@ struct oneshot_state ctl_state = {
 bool disable_primary_after_caps_word = false;
 
 void oneshot(struct oneshot_state *state, bool pressed) {
-  if (pressed) {
+  if (pressed && state->status == OS_DISABLED) {
     state->status = OS_HOLDING;
 
     if (state->layer == -1) {
@@ -91,6 +91,8 @@ void oneshot(struct oneshot_state *state, bool pressed) {
 
       break;
     default:
+      state->status = OS_DISABLED;
+      unregister_code(state->modifier);
       break;
     }
 
