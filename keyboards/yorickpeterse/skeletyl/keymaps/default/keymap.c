@@ -137,11 +137,6 @@ void after_oneshot(struct oneshot_state *state, keyrecord_t *record) {
   }
 }
 
-bool shift_comma_action(bool pressed, void *state) {
-  oneshot(&ctl_state, pressed);
-  return false;
-}
-
 bool shift_space_action(bool pressed, void *state) {
   if (pressed) {
     layer_on(NAV);
@@ -170,23 +165,9 @@ const key_override_t override_shift_space = {
     .enabled = NULL,
 };
 
-const key_override_t override_shift_comma = {
-    .trigger_mods = MOD_BIT(KC_LSFT),
-    .layers = ~0,
-    .suppressed_mods = MOD_BIT(KC_LSFT),
-    .options = ko_options_default,
-    .negative_mod_mask = 0,
-    .custom_action = shift_comma_action,
-    .context = NULL,
-    .trigger = KC_COMMA,
-    .replacement = KC_NO,
-    .enabled = NULL,
-};
-
 const key_override_t *key_overrides[] = {
     &override_shift_bspc,
     &override_shift_space,
-    &override_shift_comma,
     &override_shift_dot,
 };
 
@@ -219,11 +200,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [PRIMARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ESC   , QUES  , LPRN  , PLUS  , AT    ,        BSLS  , EQUAL , RPRN  , GRAVE , EXLM  ,
+             ESC   , QUES  , LPRN  , PLUS  , AT    ,        BSLS  , EQUAL , RPRN  , EXLM  , ASTR  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              PIPE  , SLASH , LCBR  , MINUS , LABK  ,        RABK  , UNDS  , RCBR  , QUOTE , DLR   ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             AMPR  , HASH  , LBRC  , ASTR  , SCLN  ,        COLN  , ENT   , RBRC  , DQUO  , PERC  ,
+             AMPR  , HASH  , LBRC  , OCTL  , SCLN  ,        COLN  , ENT   , RBRC  , DQUO  , PERC  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              SECON ,         ____
@@ -232,7 +213,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [SECONDARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , ____  , MOUSE , ____  ,        ____  , ____  , ____  , ____  , TILD  ,
+             ____  , ____  , ____  , MOUSE , ____  ,        ____  , ____  , ____  , GRAVE , TILD  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
@@ -321,6 +302,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     break;
   case ONESHOT_CTL:
     oneshot(&ctl_state, record->event.pressed);
+    after_oneshot(&shift_state, record);
     break;
   case KC_FUNC:
     break;
