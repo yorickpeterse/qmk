@@ -147,8 +147,6 @@ bool shift_space_action(bool pressed, void *state) {
   return false;
 }
 
-const key_override_t override_shift_bspc =
-    ko_make_basic(MOD_MASK_SHIFT, KC_BSPC, KC_DELETE);
 const key_override_t override_shift_dot =
     ko_make_basic(MOD_MASK_SHIFT, KC_DOT, KC_RALT);
 
@@ -166,7 +164,6 @@ const key_override_t override_shift_space = {
 };
 
 const key_override_t *key_overrides[] = {
-    &override_shift_bspc,
     &override_shift_space,
     &override_shift_dot,
 };
