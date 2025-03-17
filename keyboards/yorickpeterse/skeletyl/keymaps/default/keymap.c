@@ -18,6 +18,7 @@
 #define KC_OCTL ONESHOT_CTL
 #define KC_CAPS CW_TOGG
 #define KC_STAB LSFT(KC_TAB)
+#define KC_SFTENT LSFT(KC_ENT)
 
 // For some reason using _just_ KC_LGUI on an OSL layer results in it not
 // working as it should, resulting in e.g. Gnome's overview not focusing the
@@ -214,7 +215,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , LALT  , STAB  , TAB   , ____  ,        ____  , CIRC  , COMMA , DOT   , ____  ,
+             ____  , LALT  , STAB  , TAB   , ____  ,        ____  , SFTENT, COMMA , DOT   , CIRC  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              ____  ,         ____
