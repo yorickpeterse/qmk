@@ -284,15 +284,6 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
   }
 }
 
-uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
-  switch (combo->keys[0]) {
-  case KC_COMMA:
-    return 50;
-  default:
-    return COMBO_TERM;
-  }
-}
-
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
   case RIGHT_THUMB:
