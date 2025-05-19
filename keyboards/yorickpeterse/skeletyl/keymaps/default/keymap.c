@@ -166,7 +166,6 @@ const key_override_t override_shift_space = {
 const key_override_t *key_overrides[] = {
     &override_shift_space,
     &override_shift_dot,
-    &override_shift_comma,
 };
 
 const uint16_t PROGMEM combo_cd[] = {KC_C, KC_D, COMBO_END};
