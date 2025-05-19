@@ -18,7 +18,6 @@
 #define KC_OCTL ONESHOT_CTL
 #define KC_CAPS CW_TOGG
 #define KC_STAB LSFT(KC_TAB)
-#define KC_SFTENT LSFT(KC_ENT)
 
 // For some reason using _just_ KC_LGUI on an OSL layer results in it not
 // working as it should, resulting in e.g. Gnome's overview not focusing the
@@ -167,6 +166,18 @@ const key_override_t override_shift_space = {
 const key_override_t *key_overrides[] = {
     &override_shift_space,
     &override_shift_dot,
+    &override_shift_comma,
+};
+
+const uint16_t PROGMEM combo_cd[] = {KC_C, KC_D, COMBO_END};
+const uint16_t PROGMEM combo_comma_h[] = {KC_COMMA, KC_H, COMBO_END};
+
+combo_t key_combos[] = {
+    // Left base layer
+    COMBO(combo_cd, KC_OCTL),
+
+    // Right
+    COMBO(combo_comma_h, KC_ENTER),
 };
 
 // clang-format off
@@ -202,7 +213,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              PIPE  , SLASH , LCBR  , MINUS , LABK  ,        RABK  , UNDS  , RCBR  , QUOTE , DLR   ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             AMPR  , HASH  , LBRC  , OCTL  , SCLN  ,        COLN  , ENT   , RBRC  , DQUO  , PERC  ,
+             CIRC  , HASH  , LBRC  , SCLN  , AMPR  ,        TILD  , COLN  , RBRC  , DQUO  , PERC  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              SECON ,         ____
@@ -211,11 +222,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [SECONDARY] = LAYOUT(
         // ,---------------------------------------.      ,---------------------------------------.
-             ____  , ____  , ____  , ____  , ____  ,        ____  , ____  , ____  , GRAVE , TILD  ,
+             ____  , ____  , ____  , ____  , ____  ,        ____  , ____  , ____  , GRAVE , ____  ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
              1     , 2     , 3     , 4     , 5     ,        6     , 7     , 8     , 9     , 0     ,
         // |-------+-------+-------+-------+-------|      |-------+-------+-------+-------+-------|
-             ____  , LALT  , STAB  , TAB   , ____  ,        ____  , SFTENT, COMMA , DOT   , CIRC  ,
+             ____  , LALT  , STAB  , TAB   , ____  ,        ____  , ____  , COMMA , DOT   , ____  ,
         // '---------------------------------------'      '---------------------------------------'
         //                                 ,-------.      .--------.
                                              ____  ,         ____
@@ -270,6 +281,15 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     return true;
   default:
     return false;
+  }
+}
+
+uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
+  switch (combo->keys[0]) {
+  case KC_COMMA:
+    return 50;
+  default:
+    return COMBO_TERM;
   }
 }
 
