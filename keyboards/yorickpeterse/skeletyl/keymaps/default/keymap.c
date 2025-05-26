@@ -6,8 +6,8 @@
 #define KC_NONE KC_NO
 #define KC_NORM TO(NORMAL)
 #define KC_PRIM RIGHT_THUMB
-#define KC_SECON LT(SECONDARY, KC_SPACE)
 #define KC_NAV OSL(NAV)
+#define KC_SECON MO(SECONDARY)
 #define KC_MOUSE TO(MOUSE)
 #define KC_FUNC OSL(FUNCTION)
 #define KC_FULL LALT(KC_F11)
@@ -139,9 +139,9 @@ void after_oneshot(struct oneshot_state *state, keyrecord_t *record) {
 
 bool shift_space_action(bool pressed, void *state) {
   if (pressed) {
-    layer_on(NAV);
+    layer_on(SECONDARY);
   } else {
-    layer_off(NAV);
+    layer_off(SECONDARY);
   }
 
   return false;
@@ -168,15 +168,25 @@ const key_override_t *key_overrides[] = {
     &override_shift_dot,
 };
 
+const uint16_t PROGMEM combo_pf[] = {KC_P, KC_F, COMBO_END};
 const uint16_t PROGMEM combo_cd[] = {KC_C, KC_D, COMBO_END};
+
 const uint16_t PROGMEM combo_comma_h[] = {KC_COMMA, KC_H, COMBO_END};
+const uint16_t PROGMEM combo_comma_dot[] = {KC_COMMA, KC_DOT, COMBO_END};
+
+const uint16_t PROGMEM combo_lprn_plus[] = {KC_LPRN, KC_PLUS, COMBO_END};
 
 combo_t key_combos[] = {
     // Left base layer
+    COMBO(combo_pf, KC_ESC),
     COMBO(combo_cd, KC_OCTL),
+
+    // Left symbol layer
+    COMBO(combo_lprn_plus, KC_ESC),
 
     // Right
     COMBO(combo_comma_h, KC_ENTER),
+    COMBO(combo_comma_dot, KC_NAV),
 };
 
 // clang-format off
@@ -272,16 +282,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 // clang-format on
-
-bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
-  switch (keycode) {
-  case KC_SECON:
-  case KC_NAV:
-    return true;
-  default:
-    return false;
-  }
-}
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
