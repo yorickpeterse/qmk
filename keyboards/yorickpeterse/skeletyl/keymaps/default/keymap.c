@@ -171,8 +171,8 @@ const key_override_t *key_overrides[] = {
 const uint16_t PROGMEM combo_pf[] = {KC_P, KC_F, COMBO_END};
 const uint16_t PROGMEM combo_cd[] = {KC_C, KC_D, COMBO_END};
 
+const uint16_t PROGMEM combo_ne[] = {KC_N, KC_E, COMBO_END};
 const uint16_t PROGMEM combo_comma_h[] = {KC_COMMA, KC_H, COMBO_END};
-const uint16_t PROGMEM combo_comma_dot[] = {KC_COMMA, KC_DOT, COMBO_END};
 
 const uint16_t PROGMEM combo_lprn_plus[] = {KC_LPRN, KC_PLUS, COMBO_END};
 
@@ -185,8 +185,8 @@ combo_t key_combos[] = {
     COMBO(combo_lprn_plus, KC_ESC),
 
     // Right
+    COMBO(combo_ne, KC_NAV),
     COMBO(combo_comma_h, KC_ENTER),
-    COMBO(combo_comma_dot, KC_NAV),
 };
 
 // clang-format off
@@ -321,4 +321,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
 
   return true;
+}
+
+uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
+  switch (combo->keys[0]) {
+  case KC_COMMA:
+    return 100;
+  case KC_N:
+    return 30;
+  default:
+    return COMBO_TERM;
+  }
 }
