@@ -1,3 +1,4 @@
+#include "config.h"
 #include <stdint.h>
 #include <sys/types.h>
 #include QMK_KEYBOARD_H
@@ -168,25 +169,29 @@ const key_override_t *key_overrides[] = {
     &override_shift_dot,
 };
 
-const uint16_t PROGMEM combo_pf[] = {KC_P, KC_F, COMBO_END};
-const uint16_t PROGMEM combo_cd[] = {KC_C, KC_D, COMBO_END};
+enum combos {
+  COMBO_ESC,
+  COMBO_CTL,
+  COMBO_NAV,
+  COMBO_ENT,
+};
 
-const uint16_t PROGMEM combo_ne[] = {KC_N, KC_E, COMBO_END};
-const uint16_t PROGMEM combo_comma_h[] = {KC_COMMA, KC_H, COMBO_END};
+uint32_t last_key_press = 0;
 
-const uint16_t PROGMEM combo_lprn_plus[] = {KC_LPRN, KC_PLUS, COMBO_END};
+const uint16_t PROGMEM combo_esc[] = {KC_P, KC_F, COMBO_END};
+const uint16_t PROGMEM combo_ctl[] = {KC_C, KC_D, COMBO_END};
+
+const uint16_t PROGMEM combo_nav[] = {KC_U, KC_L, COMBO_END};
+const uint16_t PROGMEM combo_ent[] = {KC_COMMA, KC_H, COMBO_END};
 
 combo_t key_combos[] = {
-    // Left base layer
-    COMBO(combo_pf, KC_ESC),
-    COMBO(combo_cd, KC_OCTL),
-
-    // Left symbol layer
-    COMBO(combo_lprn_plus, KC_ESC),
+    // Left
+    [COMBO_ESC] = COMBO(combo_esc, KC_ESC),
+    [COMBO_CTL] = COMBO(combo_ctl, KC_OCTL),
 
     // Right
-    COMBO(combo_ne, KC_NAV),
-    COMBO(combo_comma_h, KC_ENTER),
+    [COMBO_NAV] = COMBO(combo_nav, KC_NAV),
+    [COMBO_ENT] = COMBO(combo_ent, KC_ENTER),
 };
 
 // clang-format off
@@ -284,6 +289,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // clang-format on
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  last_key_press = timer_read32();
+
   switch (keycode) {
   case RIGHT_THUMB:
     // This ensures that enabling the primary layer while caps word is enabled
@@ -323,13 +330,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
+bool get_combo_must_press_in_order(uint16_t combo_index, combo_t *combo) {
+  if (combo_index == COMBO_ENT) {
+    return false;
+  } else {
+    return false;
+  }
+}
+
 uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
-  switch (combo->keys[0]) {
-  case KC_COMMA:
+  if (combo_index == COMBO_ENT) {
     return 100;
-  case KC_N:
-    return 30;
-  default:
+  } else {
     return COMBO_TERM;
   }
+}
+
+uint32_t combo_idle_time(uint16_t index) {
+  switch (index) {
+  case COMBO_NAV:
+    return 100;
+  case COMBO_ENT:
+    return 25;
+  default:
+    return 50;
+  }
+}
+
+bool combo_should_trigger(uint16_t combo_index, combo_t *combo,
+                          uint16_t keycode, keyrecord_t *record) {
+  return timer_elapsed32(last_key_press) >= combo_idle_time(combo_index);
 }
