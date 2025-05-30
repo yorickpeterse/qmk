@@ -359,5 +359,9 @@ uint32_t combo_idle_time(uint16_t index) {
 
 bool combo_should_trigger(uint16_t combo_index, combo_t *combo,
                           uint16_t keycode, keyrecord_t *record) {
+  if (shift_state.status != OS_DISABLED && combo_index != COMBO_ENT) {
+    return false;
+  }
+
   return timer_elapsed32(last_key_press) >= combo_idle_time(combo_index);
 }
