@@ -332,7 +332,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 bool get_combo_must_press_in_order(uint16_t combo_index, combo_t *combo) {
   if (combo_index == COMBO_ENT) {
-    return false;
+    return true;
   } else {
     return false;
   }
@@ -351,6 +351,7 @@ uint32_t combo_idle_time(uint16_t index) {
   case COMBO_NAV:
     return 100;
   case COMBO_ENT:
+  case COMBO_ESC:
     return 25;
   default:
     return 50;
@@ -359,7 +360,15 @@ uint32_t combo_idle_time(uint16_t index) {
 
 bool combo_should_trigger(uint16_t combo_index, combo_t *combo,
                           uint16_t keycode, keyrecord_t *record) {
-  if (shift_state.status != OS_DISABLED && combo_index != COMBO_ENT) {
+  // The Enter combo is always enabled since it needs to be rolled in-order
+  // anyway and allows for faster typing (e.g. for Vim commands).
+  if (combo_index == COMBO_ENT) {
+    return true;
+  }
+
+  // Other combos are disabled if the oneshot shift key is enabled. This way I
+  // can type e.g. "Fp" without triggering an "fp" combo.
+  if (shift_state.status != OS_DISABLED) {
     return false;
   }
 
