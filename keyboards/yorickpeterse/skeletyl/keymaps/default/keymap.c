@@ -349,7 +349,7 @@ uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
 uint32_t combo_idle_time(uint16_t index) {
   switch (index) {
   case COMBO_NAV:
-    return 100;
+    return 150;
   case COMBO_ENT:
   case COMBO_ESC:
     return 25;
